@@ -101,6 +101,21 @@ struct diphotonInfo {
     float subLeadEtaSC     ;
     float leadPhiSC        ;
     float subLeadPhiSC     ;
+    int   category;
+    float leadChargedHadronIso;
+    float leadPfPhoIso03;
+    float leadFull5x5_sigmaIetaIeta;
+    float leadFull5x5_r9;
+    float leadHadronicOverEm;
+    float subLeadChargedHadronIso;
+    float subLeadPfPhoIso03;
+    float subLeadFull5x5_sigmaIetaIeta;
+    float subLeadFull5x5_r9;
+    float subLeadHadronicOverEm;
+    int   leadIsSaturated;
+    int   subLeadIsSaturated;
+    int   leadPassElectronVeto;
+    int   subLeadPassElectronVeto;
 
     void init()
     {
@@ -113,6 +128,21 @@ struct diphotonInfo {
         subLeadEtaSC = -999;
         leadPhiSC    = -999;
         subLeadPhiSC = -999;
+        category     = -999;
+        leadChargedHadronIso = -999;
+        leadPfPhoIso03 = -999;
+        leadFull5x5_sigmaIetaIeta = -999;
+        leadFull5x5_r9 = -999;
+        leadHadronicOverEm = -999;
+        subLeadChargedHadronIso = -999;
+        subLeadPfPhoIso03 = -999;
+        subLeadFull5x5_sigmaIetaIeta = -999;
+        subLeadFull5x5_r9 = -999;
+        subLeadHadronicOverEm = -999;
+        leadIsSaturated = -999;
+        subLeadIsSaturated = -999;
+        leadPassElectronVeto = -999;
+        subLeadPassElectronVeto = -999;
     }
 };
 
@@ -234,27 +264,99 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     //Handle<View<reco::Vertex> > vtxs;
     //iEvent.getByToken( vertexToken_, vtxs );
     //const PtrVector<reco::Vertex>& vtxs = primaryVertices->ptrVector();
+    
+    //Set cat boundaries
+    float boundaryEB(1.4442);
+    float boundaryEELo(1.566), boundaryEEHi(2.5);
+    int leadCat(-1), subLeadCat(-1);
 
     Handle<View<flashgg::DiPhotonCandidate> > diPhotons;
     iEvent.getByToken( diPhotonToken_, diPhotons );
     initEventStructure();
     size_t diPhotonsSize = diPhotons->size();
-    for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
-    eInfo.eventID    = event_number;
-    eInfo.mgg    = diPhotons->ptrAt(diphoIndex)->mass();
-    eInfo.leadPt            = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt();
-    eInfo.subLeadPt          = diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
-    eInfo.leadR9            = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->r9();
-    eInfo.subLeadR9          = diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->r9();
-    eInfo.leadEtaSC         = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->superCluster()->eta();
-    eInfo.subLeadEtaSC      = diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->superCluster()->eta();
-    eInfo.leadPhiSC         = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->superCluster()->phi();
-    eInfo.subLeadPhiSC      = diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->superCluster()->phi();
-    std::cout << "DEBUG event : "<< eInfo.eventID << " diphoton " << diphoIndex << " mgg " << eInfo.mgg << std::endl;
-    
-    diphotonTree->Fill();
-    }
 
+    if (diPhotonsSize > 0){
+        //Pick highest pt diphoton
+        float maxDiphoPt(0.0);
+        unsigned maxDiphoIndex(0);
+        for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
+            float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
+            if (tempPt > maxDiphoPt){
+                maxDiphoPt = tempPt;
+                maxDiphoIndex = diphoIndex;
+            }
+        }
+
+        //Fill struct
+        eInfo.eventID    = event_number;
+        eInfo.mgg    = diPhotons->ptrAt(maxDiphoIndex)->mass();
+        eInfo.leadPt            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
+        eInfo.subLeadPt          = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
+        eInfo.leadR9            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->r9();
+        eInfo.subLeadR9          = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->r9();
+        eInfo.leadEtaSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->eta();
+        eInfo.subLeadEtaSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->eta();
+        eInfo.leadPhiSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->phi();
+        eInfo.subLeadPhiSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->phi();
+        eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->chargedHadronIso();
+        eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pfPhoIso03();
+        eInfo.leadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_sigmaIetaIeta();
+        eInfo.leadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_r9();
+        eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadronicOverEm();
+        eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->chargedHadronIso();
+        eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pfPhoIso03();
+        eInfo.subLeadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_sigmaIetaIeta();
+        eInfo.subLeadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_r9();
+        eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadronicOverEm();
+        eInfo.leadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
+                                  && !diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
+        eInfo.subLeadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
+                                     && !diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
+        eInfo.leadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->passElectronVeto());
+        eInfo.subLeadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->passElectronVeto());
+
+        if (fabs(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta()) < boundaryEB){
+            leadCat = 0;
+        }else if (fabs(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta()) > boundaryEELo
+                    && fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta()) < boundaryEEHi){
+            leadCat = 1;
+        }
+        if (fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta()) < boundaryEB){
+            subLeadCat = 0;
+        }else if (fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta()) > boundaryEELo
+                    && fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta()) < boundaryEEHi){
+            subLeadCat = 1;
+        }
+        if (leadCat == 0 && subLeadCat == 0){
+            eInfo.category = 0;
+        }else if ((leadCat == 0 && subLeadCat == 1) || (leadCat == 1 && subLeadCat == 0)){
+            eInfo.category = 1;
+        }
+
+        std::cout << "DEBUG event : " << eInfo.eventID << " diphoton " << maxDiphoIndex << " mgg " << eInfo.mgg << " cat " << eInfo.category;
+
+        //Preselection
+        float ptCut(75),mggCutEBEB(230),mggCutEBEE(320);
+        bool passesPtCut = eInfo.leadPt > ptCut && eInfo.subLeadPt > ptCut;
+        bool passesLeadEtaSCCut = fabs(eInfo.leadEtaSC) < boundaryEEHi && !(fabs(eInfo.leadEtaSC) > boundaryEB && fabs(eInfo.leadEtaSC) < boundaryEELo);
+        bool passesSubLeadEtaSCCut = fabs(eInfo.subLeadEtaSC) < boundaryEEHi && !(fabs(eInfo.subLeadEtaSC) > boundaryEB && fabs(eInfo.subLeadEtaSC) < boundaryEELo);
+        bool passesOneBarrelEtaSCCut = fabs(eInfo.leadEtaSC) < boundaryEB || fabs(eInfo.subLeadEtaSC) < boundaryEB;
+        bool passesMassCut(false);
+        if (eInfo.category == 0){
+            passesMassCut = eInfo.mgg > mggCutEBEB;
+        }else if (eInfo.category == 1){
+            passesMassCut = eInfo.mgg > mggCutEBEE;
+        }
+
+        if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
+            std::cout << " PASS" << endl;
+            diphotonTree->Fill();
+        }else{
+            std::cout << " FAIL" << endl;
+        }
+    }else{
+        std::cout << "Event has no diphotons" << std::endl;
+    }
     event_number++;
 }
 
@@ -275,6 +377,22 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "subLeadEtaSC " , &eInfo.subLeadEtaSC  , Form("%s/F","subLeadEtaSC"));
     diphotonTree->Branch( "leadPhiSC    " , &eInfo.leadPhiSC     , Form("%s/F","leadPhiSC"));
     diphotonTree->Branch( "subLeadPhiSC " , &eInfo.subLeadPhiSC  , Form("%s/F","subLeadPhiSC"));
+    diphotonTree->Branch( "category " , &eInfo.category  , Form("%s/I","category"));
+    diphotonTree->Branch( "leadChargedHadronIso " , &eInfo.leadChargedHadronIso  , Form("%s/F","leadChargedHadronIso"));
+    diphotonTree->Branch( "leadPfPhoIso03 " , &eInfo.leadPfPhoIso03  , Form("%s/F","leadPfPhoIso03"));
+    diphotonTree->Branch( "leadFull5x5_sigmaIetaIeta " , &eInfo.leadFull5x5_sigmaIetaIeta  , Form("%s/F","leadFull5x5_sigmaIetaIeta"));
+    diphotonTree->Branch( "leadFull5x5_r9 " , &eInfo.leadFull5x5_r9  , Form("%s/F","leadFull5x5_r9"));
+    diphotonTree->Branch( "leadHadronicOverEm " , &eInfo.leadHadronicOverEm  , Form("%s/F","leadHadronicOverEm"));
+    diphotonTree->Branch( "subLeadChargedHadronIso " , &eInfo.subLeadChargedHadronIso  , Form("%s/F","subLeadChargedHadronIso"));
+    diphotonTree->Branch( "subLeadPfPhoIso03 " , &eInfo.subLeadPfPhoIso03  , Form("%s/F","subLeadPfPhoIso03"));
+    diphotonTree->Branch( "subLeadFull5x5_sigmaIetaIeta " , &eInfo.subLeadFull5x5_sigmaIetaIeta  , Form("%s/F","subLeadFull5x5_sigmaIetaIeta"));
+    diphotonTree->Branch( "subLeadFull5x5_r9 " , &eInfo.subLeadFull5x5_r9  , Form("%s/F","subLeadFull5x5_r9"));
+    diphotonTree->Branch( "subLeadHadronicOverEm " , &eInfo.subLeadHadronicOverEm  , Form("%s/F","subLeadHadronicOverEm"));
+    diphotonTree->Branch( "leadIsSaturated " , &eInfo.leadIsSaturated  , Form("%s/I","leadIsSaturated"));
+    diphotonTree->Branch( "subLeadIsSaturated " , &eInfo.subLeadIsSaturated  , Form("%s/I","subLeadIsSaturated"));
+    diphotonTree->Branch( "leadPassElectronVeto " , &eInfo.leadPassElectronVeto  , Form("%s/I","leadPassElectronVeto"));
+    diphotonTree->Branch( "subLeadPassElectronVeto " , &eInfo.subLeadPassElectronVeto  , Form("%s/I","subLeadPassElectronVeto"));
+
 }
 
 void EXOValidationTreeMaker::endJob()
