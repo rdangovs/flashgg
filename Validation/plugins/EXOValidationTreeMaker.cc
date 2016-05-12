@@ -254,6 +254,7 @@ void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
 
+    /*
     if( debug_ ) {
         std::cout << "\e[0;31m";
         std::cout << setw( 6 )  << "========================= "            << std::endl;
@@ -261,6 +262,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         std::cout << setw( 6 )  << "------------------------- "            << std::endl;
         std::cout << "\e[0m" << std::endl;
     }
+    */
 
 
     //Handle<View<reco::Vertex> > vtxs;
@@ -355,7 +357,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             eInfo.category = 1;
         }
 
-        std::cout << "DEBUG event : " << eInfo.eventID << " diphoton " << maxDiphoIndex << " mgg " << eInfo.mgg << " cat " << eInfo.category;
+        //std::cout << "DEBUG event : " << eInfo.eventID << " diphoton " << maxDiphoIndex << " mgg " << eInfo.mgg << " cat " << eInfo.category;
 
         //Preselection
         float ptCut(75),mggCutEBEB(230),mggCutEBEE(320);
@@ -371,14 +373,14 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }
 
         if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
-            std::cout << " PASS" << endl;
+            //std::cout << " PASS" << endl;
             diphotonTree->Fill();
-        }else{
+        }/*else{
             std::cout << " FAIL" << endl;
-        }
-    }else{
+        }*/
+    }/*else{
         std::cout << "Event has no diphotons" << std::endl;
-    }
+    }*/
     event_number++;
 }
 
