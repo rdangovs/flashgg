@@ -162,6 +162,7 @@ public:
     ~EXOValidationTreeMaker();
 
     static void fillDescriptions( edm::ConfigurationDescriptions &descriptions );
+    bool passPhotonIDCuts(const flashgg::Photon* pho); 
 
 
 private:
@@ -171,6 +172,7 @@ private:
     virtual void beginJob() override;
     virtual void analyze( const edm::Event &, const edm::EventSetup & ) override;
     virtual void endJob() override;
+    
 
     // Additional methods
     void initEventStructure();
@@ -269,24 +271,44 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     float boundaryEB(1.4442);
     float boundaryEELo(1.566), boundaryEEHi(2.5);
     int leadCat(-1), subLeadCat(-1);
+    
 
     Handle<View<flashgg::DiPhotonCandidate> > diPhotons;
     iEvent.getByToken( diPhotonToken_, diPhotons );
     initEventStructure();
     size_t diPhotonsSize = diPhotons->size();
 
-    if (diPhotonsSize > 0){
+        
         //Pick highest pt diphoton
         float maxDiphoPt(0.0);
-        unsigned maxDiphoIndex(0);
+        int  maxDiphoIndex(-1);
         for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
+            
+            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton())){ 
+                 std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
+                continue;}
+            else {
+                 std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
+            }
+            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton())){ 
+                
+                 std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
+                continue;
+                }
+            else {
+                 std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
+            }
+
+
             float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
             if (tempPt > maxDiphoPt){
                 maxDiphoPt = tempPt;
                 maxDiphoIndex = diphoIndex;
             }
         }
-
+        
+        if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
+        std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
         //Fill struct
         eInfo.eventID    = event_number;
         eInfo.mgg    = diPhotons->ptrAt(maxDiphoIndex)->mass();
@@ -415,6 +437,40 @@ void EXOValidationTreeMaker::fillDescriptions( edm::ConfigurationDescriptions &d
     descriptions.addDefault( desc );
 }
 
+bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho){
+    float eta = pho->superCluster()->eta();
+    int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
+    float isoCh = pho->chargedHadronIso();
+    float isoGam =  pho->pfPhoIso03();
+    float hoe = pho->hadronicOverEm() ;
+    float sieie = pho->full5x5_sigmaIetaIeta(); 
+    int eleVeto = pho->passElectronVeto();
+    bool pass=0;
+    if (eleVeto){
+        if (fabs(eta) < 1.4442 && !saturated){
+             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.0105){
+                pass=1;
+             }
+        }
+        if (fabs(eta) < 1.4442 && saturated){
+             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.0112){
+                pass=1;
+             }
+        }
+        if (fabs(eta) > 1.566 && !saturated){
+             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.028){
+                pass=1;
+             }
+        }
+        if (fabs(eta) < 1.566 && saturated){
+             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.03){
+                pass=1;
+             }
+        }
+
+    }
+    return pass;
+}
 typedef EXOValidationTreeMaker FlashggEXOValidationTreeMaker;
 DEFINE_FWK_MODULE( FlashggEXOValidationTreeMaker );
 

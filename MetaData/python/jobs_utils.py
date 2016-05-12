@@ -336,8 +336,16 @@ class JobsManager(object):
                 if  njobs != 0:
                     print  "splitting in (up to) %d jobs\n checking how many are needed... " % njobs, 
                     dnjobs = 0
-                    dargs = jobargs+shell_args("nJobs=%d" % (njobs)) 
+                    dargs = jobargs+shell_args("nJobs=%d" % (njobs))
+                    print "DEBUG LC darsg ",dargs 
+                    dargs_string = ""
+                    for d in dargs:
+                      dargs_string=dargs_string+" %s"%d
+                    print "DEBUG LC dargs_string ",dargs_string
+                    print "python %s" % pyjob, dargs_string , "dryRun=1 getMaxJobs=1 dumpPython=%s.py" % os.path.join(options.outputDir,dsetName)
                     ret,out = parallel.run("python %s" % pyjob,dargs+shell_args("dryRun=1 getMaxJobs=1 dumpPython=%s.py" % os.path.join(options.outputDir,dsetName) ),interactive=True)[2]
+                    print "LC DEBUG ret",ret
+                    print "LC DEBUG out",out
                     maxJobs = self.getMaxJobs(out)
                     print maxJobs
                     if maxJobs < 0:

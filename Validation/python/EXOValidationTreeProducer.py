@@ -49,3 +49,9 @@ process.p = cms.Path(
     process.flashggEXOValidationTreeMaker 
     )
 process.e = cms.EndPath(process.out)
+
+# customization for job splitting, lumi weighting, etc.
+from diphotons.MetaData.JobConfig import customize
+customize.setDefault("maxEvents",-1)
+customize(process)
+
