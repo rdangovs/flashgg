@@ -45,7 +45,7 @@ process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True
 process.p = cms.Path( 
     process.flashggEXOValidationTreeMaker 
     )
-process.e = cms.EndPath(process.out)
+process.e = cms.EndPath()
 
  # customization for job splitting, lumi weighting, etc.
 from diphotons.MetaData.JobConfig import customize
