@@ -15,6 +15,8 @@ struct PlotInfo {
     string title;
     string xLabel;
     string yLabel;
+    bool logXPlot;
+    bool logYPlot;
 
 };
 
@@ -26,7 +28,7 @@ void ExoPlotMaker(){
 
     TCanvas c1("c1");
 
-    TFile *_file0 = TFile::Open("output.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -51,22 +53,20 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
     hist->GetXaxis()->SetTitle(info.xLabel.c_str());
     hist->GetYaxis()->SetTitle(info.yLabel.c_str());
 
-    gStyle->SetOptStat(11111);
-    gStyle->SetOptFit(11111);
     hist->SetMarkerColor(kBlack);
     hist->SetStats(kFALSE);
+    hist->SetMarkerStyle(20);
+    hist->SetLineWidth(2);
 
-    hist->Draw("EP");
-    c2.Print(Form("plots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-
-}
-
-void makeSimplePlot(TTree* tree, string var, int cat){
-
-    TCanvas c2("c2");
-    tree->Draw(var.c_str(),Form("category==%d",cat));
-    c2.Print(Form("plots/%s_cat%d_SimplePlot.pdf",var.c_str(),cat));
-
+    hist->Draw();
+    if (info.logXPlot){
+        c2.SetLogx();
+    }
+    if (info.logYPlot){
+        c2.SetLogy();
+    }
+    c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
+    c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.png",info.var.c_str(),info.category));
 }
 
 vector<PlotInfo> getPlotDetails(){
@@ -75,19 +75,21 @@ vector<PlotInfo> getPlotDetails(){
     PlotInfo info;
     //mgg
     info.var = "mgg";
-    info.nBins = 34;
+    info.nBins = 55;
     info.xMin = 230;
-    info.xMax = 910;
+    info.xMax = 1330;
     info.category = 0;
     info.title = "m_{#gamma#gamma}";
     info.xLabel = "m_{#gamma#gamma} (GeV)";
     info.yLabel = "dN/dm_{#gamma#gamma}";
+    info.logXPlot = false;
+    info.logYPlot = true;
     plotInfo.push_back(info);
 
     info.category = 1;
-    info.nBins = 25;
+    info.nBins = 63;
     info.xMin = 320;
-    info.xMax = 910;
+    info.xMax = 1580;
     plotInfo.push_back(info);
 
     //pT(lead)
@@ -99,6 +101,8 @@ vector<PlotInfo> getPlotDetails(){
     info.title = "Leading Photon p_{T}";
     info.xLabel = "p_T (GeV)";
     info.yLabel = "dN/dp_{T}";
+    info.logXPlot = false;
+    info.logYPlot = false;
     plotInfo.push_back(info);
 
     info.category = 1;
@@ -173,11 +177,6 @@ vector<PlotInfo> getPlotDetails(){
 
     info.category = 1;
     plotInfo.push_back(info);
-
-
-
-
-
 
     //Lead Supercluster phi
     info.var = "leadPhiSC";
@@ -269,8 +268,8 @@ vector<PlotInfo> getPlotDetails(){
     info.xMin = 0;
     info.xMax = 0.07;
     info.category = 0;
-    info.title = "Leading Photon #sigma_{{i#eta}{i#eta}}";
-    info.xLabel = "#sigma_{{i#eta}{i#eta}}";
+    info.title = "Leading Photon #sigma_{i#eta i#eta}";
+    info.xLabel = "#sigma_{i#eta i#eta}";
     info.yLabel = "";
     plotInfo.push_back(info);
 
@@ -283,8 +282,8 @@ vector<PlotInfo> getPlotDetails(){
     info.xMin = 0;
     info.xMax = 0.07;
     info.category = 0;
-    info.title = "Subleading Photon #sigma_{{i#eta}{i#eta}}";
-    info.xLabel = "#sigma_{{i#eta}{i#eta}}";
+    info.title = "Subleading Photon #sigma_{i#eta i#eta}";
+    info.xLabel = "#sigma_{i#eta i#eta}";
     info.yLabel = "";
     plotInfo.push_back(info);
 
