@@ -40,12 +40,18 @@ process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTree
                                                             )
 #
 
-process.out = cms.OutputModule("PoolOutputModule", fileName = cms.untracked.string('testetstestst.root'),
-                               outputCommands = cms.untracked.vstring())
-
 process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True) )
 
 process.p = cms.Path( 
     process.flashggEXOValidationTreeMaker 
     )
 process.e = cms.EndPath(process.out)
+
+ # customization for job splitting, lumi weighting, etc.
+from diphotons.MetaData.JobConfig import customize
+customize.setDefault("maxEvents",500)
+customize(process)
+
+
+
+

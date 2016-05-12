@@ -9,7 +9,7 @@ class JobConfig(object):
         
         super(JobConfig,self).__init__()
 
-        self.metaDataSrc=kwargs.get("metaDataSrc","flashgg")
+        self.metaDataSrc=kwargs.get("metaDataSrc","diphotons")
         self.crossSections=kwargs.get("crossSections",["$CMSSW_BASE/src/flashgg/MetaData/data/cross_sections.json"])
         self.tfileOut=kwargs.get("tfileOut",None)
 
