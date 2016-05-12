@@ -38,6 +38,37 @@ void ExoPlotMaker(){
 
 }
 
+void makeFancyPlot(TTree* tree, PlotInfo &info){
+
+    TCanvas c2("c2");
+    TCut cut = Form("category==%d",info.category);
+    tree->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
+    TH1F *h = (TH1F*)gPad->GetPrimitive("h");
+
+    TH1F *hist = new TH1F(*h);
+    hist->SetName(Form("%s_hist",info.var.c_str()));
+    hist->SetTitle(Form("%s Cat%d",info.title.c_str(),info.category));
+    hist->GetXaxis()->SetTitle(info.xLabel.c_str());
+    hist->GetYaxis()->SetTitle(info.yLabel.c_str());
+
+    gStyle->SetOptStat(11111);
+    gStyle->SetOptFit(11111);
+    hist->SetMarkerColor(kBlack);
+    hist->SetStats(kFALSE);
+
+    hist->Draw("EP");
+    c2.Print(Form("plots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
+
+}
+
+void makeSimplePlot(TTree* tree, string var, int cat){
+
+    TCanvas c2("c2");
+    tree->Draw(var.c_str(),Form("category==%d",cat));
+    c2.Print(Form("plots/%s_cat%d_SimplePlot.pdf",var.c_str(),cat));
+
+}
+
 vector<PlotInfo> getPlotDetails(){
 
     vector<PlotInfo> plotInfo;
@@ -318,39 +349,5 @@ vector<PlotInfo> getPlotDetails(){
 
     return plotInfo;
 }
-
-
-void makeFancyPlot(TTree* tree, PlotInfo &info){
-
-    TCanvas c2("c2");
-    TCut cut = Form("category==%d",info.category);
-    tree->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
-    TH1F *h = (TH1F*)gPad->GetPrimitive("h");
-
-    TH1F *hist = new TH1F(*h);
-    hist->SetName(Form("%s_hist",info.var.c_str()));
-    hist->SetTitle(Form("%s Cat%d",info.title.c_str(),info.category));
-    hist->GetXaxis()->SetTitle(info.xLabel.c_str());
-    hist->GetYaxis()->SetTitle(info.yLabel.c_str());
-
-    gStyle->SetOptStat(11111);
-    gStyle->SetOptFit(11111);
-    hist->SetMarkerColor(kBlack);
-    hist->SetStats(kFALSE);
-
-    hist->Draw("EP");
-    c2.Print(Form("plots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-
-}
-
-void makeSimplePlot(TTree* tree, string var, int cat){
-
-    TCanvas c2("c2");
-    tree->Draw(var.c_str(),Form("category==%d",cat));
-    c2.Print(Form("plots/%s_cat%d_SimplePlot.pdf",var.c_str(),cat));
-
-}
-
-
 
 
