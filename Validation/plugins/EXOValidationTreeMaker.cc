@@ -162,7 +162,8 @@ public:
     ~EXOValidationTreeMaker();
 
     static void fillDescriptions( edm::ConfigurationDescriptions &descriptions );
-    bool passPhotonIDCuts(const flashgg::Photon* pho); 
+    bool passPhotonIDCuts(const flashgg::Photon* pho, const double rho); 
+    float  correctIsoGam(const flashgg::Photon* pho, const double rho);
 
 
 private:
@@ -188,6 +189,7 @@ private:
     //std::vector<edm::EDGetTokenT<View<flashgg::Jet> > >  tokenJets_;
     //std::vector<edm::InputTag>                           inputTagJets_;
     EDGetTokenT< edm::View<flashgg::DiPhotonCandidate> > diPhotonToken_;
+    EDGetTokenT<double> rhoToken_;
     //EDGetTokenT< View<reco::Vertex> >                    vertexToken_;
     //EDGetTokenT< VertexCandidateMap > vertexCandidateMapToken_;
 
@@ -220,6 +222,7 @@ EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig
     //jetDzToken_   ( consumes<View<flashgg::Jet> >( iConfig.getParameter<InputTag>( "JetTagDz" ) ) ),
     //inputTagJets_( iConfig.getParameter<std::vector<edm::InputTag> >( "inputTagJets" ) ),
     diPhotonToken_( consumes<View<flashgg::DiPhotonCandidate> >( iConfig.getParameter<InputTag> ( "DiPhotonTag" ) ) ),
+    rhoToken_( consumes<double>( iConfig.getParameter<edm::InputTag>( "rhoFixedGridCollection" ) ) ),
     //vertexToken_( consumes<View<reco::Vertex> >( iConfig.getUntrackedParameter<InputTag> ( "VertexTag", InputTag( "offlineSlimmedPrimaryVertices" ) ) ) ),
     //vertexCandidateMapToken_( consumes<VertexCandidateMap>( iConfig.getParameter<InputTag>( "VertexCandidateMapTag" ) ) ),
 
@@ -280,19 +283,23 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     initEventStructure();
     size_t diPhotonsSize = diPhotons->size();
 
+    Handle<double> rhoHandle; 
+    iEvent.getByToken( rhoToken_, rhoHandle );
+    const double rhoFixedGrd = *( rhoHandle.product() );
+
         
         //Pick highest pt diphoton
         float maxDiphoPt(0.0);
         int  maxDiphoIndex(-1);
         for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
             
-            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton())){ 
+            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
                  std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
                 continue;}
             else {
                  std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
             }
-            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton())){ 
+            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
                 
                  std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
                 continue;
@@ -439,33 +446,56 @@ void EXOValidationTreeMaker::fillDescriptions( edm::ConfigurationDescriptions &d
     descriptions.addDefault( desc );
 }
 
-bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho){
+float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const double rho){
+    float eta = pho->superCluster()->eta();
+    float isoGam =  pho->pfPhoIso03();
+    float pt = pho->pt();
+    float alpha =2.5;
+    float A =-1.;
+    float kappa =-1.;
+        if (fabs(eta) < 0.9 ){ A=0.17 ; kappa =4.5e-3 ;}
+        if (fabs(eta) >= 0.9 && fabs(eta)<1.4442 ){ A=0.14 ; kappa =4.5e-3;}
+        if (fabs(eta) >= 1.566 && fabs(eta)<2.0 ){ A=0.11 ; kappa =4.5e-3;}
+        if (fabs(eta) >= 2.0 && fabs(eta)<2.2 ){ A=0.14 ; kappa =3e-3;}
+        if (fabs(eta) >= 2.2 && fabs(eta)<2.5 ){ A=0.22 ; kappa =3e-3;}
+    
+    float corrIsoGam = alpha + isoGam - rho*A  - kappa *pt;
+    std::cout << "DEBUG cpriginal isoGam " << isoGam << " corrected isoGHam " << corrIsoGam << " : alpha " << alpha << " A  " << A << " kappa " << kappa <<  " rho " << rho << std::endl;
+    return corrIsoGam;
+
+
+}
+
+
+bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const double rho){
     float eta = pho->superCluster()->eta();
     int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
     float isoCh = pho->chargedHadronIso();
-    float isoGam =  pho->pfPhoIso03();
+    //float isoGam =  pho->pfPhoIso03();
     float hoe = pho->hadronicOverEm() ;
     float sieie = pho->full5x5_sigmaIetaIeta(); 
     int eleVeto = pho->passElectronVeto();
     bool pass=0;
+
+    float correctedIsoGam = correctIsoGam(pho, rho);
     if (eleVeto){
         if (fabs(eta) < 1.4442 && !saturated){
-             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.0105){
+             if (isoCh <5 && correctedIsoGam < 2.75 && hoe <0.05 && sieie<0.0105){
                 pass=1;
              }
         }
         if (fabs(eta) < 1.4442 && saturated){
-             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.0112){
+             if (isoCh <5 && correctedIsoGam < 2.75 && hoe <0.05 && sieie<0.0112){
                 pass=1;
              }
         }
         if (fabs(eta) > 1.566 && !saturated){
-             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.028){
+             if (isoCh <5 && correctedIsoGam < 2.0 && hoe <0.05 && sieie<0.028){
                 pass=1;
              }
         }
         if (fabs(eta) < 1.566 && saturated){
-             if (isoCh <5 && isoGam < 2.5 && hoe <0.05 && sieie<0.03){
+             if (isoCh <5 && correctedIsoGam < 2.0 && hoe <0.05 && sieie<0.03){
                 pass=1;
              }
         }

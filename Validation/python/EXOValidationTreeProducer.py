@@ -37,6 +37,7 @@ process.TFileService = cms.Service("TFileService",fileName  = cms.string("exoVal
     
 process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
                                                             DiPhotonTag     = cms.InputTag('flashggDiPhotons'),
+																														rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                                             )
 #
 
@@ -51,7 +52,5 @@ process.e = cms.EndPath()
 from diphotons.MetaData.JobConfig import customize
 customize.setDefault("maxEvents",500)
 customize(process)
-
-
 
 
