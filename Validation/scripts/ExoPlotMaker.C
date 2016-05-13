@@ -23,13 +23,14 @@ struct PlotInfo {
 vector<PlotInfo> getPlotDetails();
 void makeFancyPlot(TTree* tree, PlotInfo &info);
 void makeSimplePlot(TTree* tree, string var, int cat);
+void compareWithEXO(TTree *tree, PlotInfo &info);
 
 void ExoPlotMaker(){
 
     gROOT->SetBatch(1);
     TCanvas c1("c1","c1",500,500);
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_13_05.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -38,8 +39,57 @@ void ExoPlotMaker(){
     for (unsigned i=0;i<plotInfo.size();i++){
         makeFancyPlot(tree,plotInfo[i]);
     }
+    compareWithEXO(tree,plotInfo[0]);
+    compareWithEXO(tree,plotInfo[1]);
 
 }
+
+void compareWithEXO(TTree *tree, PlotInfo &info){
+
+    string cat;
+    if (info.category == 0){
+        cat = "EBEB";
+    }else{
+        cat = "EBEE";
+    }
+    cout << "Comparing " << info.var << " plots in category " << cat << endl;
+
+    TFile *_file0 = TFile::Open("/afs/cern.ch/user/m/musella/public/workspace/exo/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
+    t_EBEB=_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
+    t_EBEB->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax));
+    TH1F *h = (TH1F*)gPad->GetPrimitive("h");
+
+    TCut cut = Form("category==%d",info.category);
+    tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
+    TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
+
+    cout << setw(24) << "Old" << setw(24) << "New" << setw(24) << "Compare" << endl;
+    cout << setw(12) << "Centre" << setw(12) << "Height";
+    cout << setw(12) << "Centre" << setw(12) << "Height";
+    cout << setw(12) << "new - old" << setw(12) << "\% diff";
+    cout << endl;
+    for(unsigned i=1;i<=h->GetNbinsX();i++){
+        cout << setw(12) << h->GetBinCenter(i);
+        cout << setw(12) << h->GetBinContent(i);
+        cout << setw(12) << histNew->GetBinCenter(i);
+        cout << setw(12) << histNew->GetBinContent(i);
+        cout << setw(12) << histNew->GetBinContent(i) - h->GetBinContent(i);
+        cout << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
+        cout << endl;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void makeFancyPlot(TTree* tree, PlotInfo &info){
 
