@@ -26,9 +26,10 @@ void makeSimplePlot(TTree* tree, string var, int cat);
 
 void ExoPlotMaker(){
 
-    TCanvas c1("c1");
+    gROOT->SetBatch(1);
+    TCanvas c1("c1","c1",500,500);
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_13_05.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -42,7 +43,7 @@ void ExoPlotMaker(){
 
 void makeFancyPlot(TTree* tree, PlotInfo &info){
 
-    TCanvas c2("c2");
+    TCanvas c2("c2","c2",500,500);
     TCut cut = Form("category==%d",info.category);
     tree->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
     TH1F *h = (TH1F*)gPad->GetPrimitive("h");
@@ -57,16 +58,20 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
     hist->SetStats(kFALSE);
     hist->SetMarkerStyle(20);
     hist->SetLineWidth(2);
-
-    hist->Draw();
+    
+		gStyle->SetEndErrorSize(3);
+    hist->SetMarkerStyle(20);
+		hist->Draw("E1");
     if (info.logXPlot){
         c2.SetLogx();
     }
     if (info.logYPlot){
         c2.SetLogy();
     }
-    c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-    c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.png",info.var.c_str(),info.category));
+    //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
+    //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.png",info.var.c_str(),info.category));
+    c2.Print(Form("%s_cat%d_plot.pdf",info.var.c_str(),info.category));
+    c2.Print(Form("%s_cat%d_plot.png",info.var.c_str(),info.category));
 }
 
 vector<PlotInfo> getPlotDetails(){
@@ -75,9 +80,9 @@ vector<PlotInfo> getPlotDetails(){
     PlotInfo info;
     //mgg
     info.var = "mgg";
-    info.nBins = 55;
+    info.nBins = 69;
     info.xMin = 230;
-    info.xMax = 1330;
+    info.xMax = 1610;
     info.category = 0;
     info.title = "m_{#gamma#gamma}";
     info.xLabel = "m_{#gamma#gamma} (GeV)";
