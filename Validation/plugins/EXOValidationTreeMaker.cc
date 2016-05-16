@@ -455,7 +455,7 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
     float kappa =-1.;
         if (fabs(eta) < 0.9 ){ A=0.17 ; kappa =4.5e-3 ;}
         if (fabs(eta) >= 0.9 && fabs(eta)<1.4442 ){ A=0.14 ; kappa =4.5e-3;}
-        if (fabs(eta) >= 1.566 && fabs(eta)<2.0 ){ A=0.11 ; kappa =4.5e-3;}
+        if (fabs(eta) >= 1.566 && fabs(eta)<2.0 ){ A=0.11 ; kappa =3e-3;}
         if (fabs(eta) >= 2.0 && fabs(eta)<2.2 ){ A=0.14 ; kappa =3e-3;}
         if (fabs(eta) >= 2.2 && fabs(eta)<2.5 ){ A=0.22 ; kappa =3e-3;}
     
@@ -480,7 +480,7 @@ bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const 
     float correctedIsoGam = correctIsoGam(pho, rho);
     if (eleVeto){
         if (fabs(eta) < 1.4442 && !saturated){
-             if (isoCh <5 && correctedIsoGam < 2.75 && hoe <0.05 && sieie<0.0105){
+             if (isoCh <5 && correctedIsoGam < 2.5 && hoe <0.05 && sieie<0.0105){
                 pass=1;
              }
         }
