@@ -55,13 +55,15 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     cout << "Comparing " << info.var << " plots in category " << cat << endl;
 
     TFile *_file0 = TFile::Open("/afs/cern.ch/user/m/musella/public/workspace/exo/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
-    t_EBEB=_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
+    TTree *t_EBEB=(TTree*)_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
     t_EBEB->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax));
     TH1F *h = (TH1F*)gPad->GetPrimitive("h");
 
     TCut cut = Form("category==%d",info.category);
     tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
     TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
+
+    cout << "Old has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
 
     cout << setw(24) << "Old" << setw(24) << "New" << setw(24) << "Compare" << endl;
     cout << setw(12) << "Centre" << setw(12) << "Height";
@@ -77,6 +79,28 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
         cout << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
         cout << endl;
     }
+    TCanvas c2("c2");
+    if (info.logXPlot){
+        c2.SetLogx();
+    }
+    if (info.logYPlot){
+        c2.SetLogy();
+    }
+    h->SetLineColor(kBlue);
+    histNew->SetLineColor(kRed);
+    h->Draw();
+    histNew->Draw("same");
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_comparisonplot.pdf",info.var.c_str(),info.category));
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_comparisonplot.png",info.var.c_str(),info.category));
+
+    c2.Clear();
+    h->SetMarkerColor(kBlack);
+    h->SetStats(kFALSE);
+    h->SetMarkerStyle(20);
+    h->SetLineWidth(2);
+    h->Draw("E1");
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_Original.pdf",info.var.c_str(),info.category));
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_Original.png",info.var.c_str(),info.category));
 
 }
 
@@ -120,8 +144,8 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
     }
     //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
     //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.png",info.var.c_str(),info.category));
-    c2.Print(Form("%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-    c2.Print(Form("%s_cat%d_plot.png",info.var.c_str(),info.category));
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
+    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_plot.png",info.var.c_str(),info.category));
 }
 
 vector<PlotInfo> getPlotDetails(){
