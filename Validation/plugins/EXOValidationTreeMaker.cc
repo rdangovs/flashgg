@@ -329,16 +329,22 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         eInfo.subLeadEtaSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->eta();
         eInfo.leadPhiSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->phi();
         eInfo.subLeadPhiSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->phi();
-        eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->chargedHadronIso();
-        eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pfPhoIso03();
+        eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->egChargedHadronIso();
+        //eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->chargedHadronIso();
+        eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->egPhotonIso();
+        //eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pfPhoIso03();
         eInfo.leadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_sigmaIetaIeta();
         eInfo.leadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_r9();
-        eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadronicOverEm();
-        eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->chargedHadronIso();
-        eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pfPhoIso03();
+        eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadTowOverEm();
+        //eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadronicOverEm();
+        //eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->chargedHadronIso();
+        eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->egChargedHadronIso();
+        eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->egPhotonIso();
+        //eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pfPhoIso03();
         eInfo.subLeadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_sigmaIetaIeta();
         eInfo.subLeadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_r9();
-        eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadronicOverEm();
+        eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadTowOverEm();
+        //eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadronicOverEm();
         eInfo.leadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
                                   && !diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
         eInfo.subLeadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
@@ -448,7 +454,8 @@ void EXOValidationTreeMaker::fillDescriptions( edm::ConfigurationDescriptions &d
 
 float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const double rho){
     float eta = pho->superCluster()->eta();
-    float isoGam =  pho->pfPhoIso03();
+    float isoGam =  pho->egPhotonIso();
+    //float isoGam =  pho->pfPhoIso03();
     float pt = pho->pt();
     float alpha =2.5;
     float A =-1.;
@@ -470,9 +477,11 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
 bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const double rho){
     float eta = pho->superCluster()->eta();
     int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
-    float isoCh = pho->chargedHadronIso();
+    //float isoCh = pho->chargedHadronIso();
+    float isoCh = pho->egChargedHadronIso();
     //float isoGam =  pho->pfPhoIso03();
-    float hoe = pho->hadronicOverEm() ;
+    //float hoe = pho->hadronicOverEm() ;
+    float hoe = pho->hadTowOverEm() ;
     float sieie = pho->full5x5_sigmaIetaIeta(); 
     int eleVeto = pho->passElectronVeto();
     bool pass=0;
