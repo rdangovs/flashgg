@@ -477,6 +477,7 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
 bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const double rho){
     float eta = pho->superCluster()->eta();
     int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
+    int weird = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
     //float isoCh = pho->chargedHadronIso();
     float isoCh = pho->egChargedHadronIso();
     //float isoGam =  pho->pfPhoIso03();
@@ -493,7 +494,7 @@ bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const 
                 pass=1;
              }
         }
-        if (fabs(eta) < 1.4442 && saturated){
+        if (fabs(eta) < 1.4442 && saturated && !weird){
              if (isoCh <5 && correctedIsoGam < 2.75 && hoe <0.05 && sieie<0.0112){
                 pass=1;
              }
@@ -503,7 +504,7 @@ bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const 
                 pass=1;
              }
         }
-        if (fabs(eta) < 1.566 && saturated){
+        if (fabs(eta) < 1.566 && saturated && !weird){
              if (isoCh <5 && correctedIsoGam < 2.0 && hoe <0.05 && sieie<0.03){
                 pass=1;
              }
