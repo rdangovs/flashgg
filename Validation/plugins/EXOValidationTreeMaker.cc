@@ -480,7 +480,7 @@ bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const 
     float correctedIsoGam = correctIsoGam(pho, rho);
     if (eleVeto){
         if (fabs(eta) < 1.4442 && !saturated){
-             if (isoCh <5 && correctedIsoGam < 2.5 && hoe <0.05 && sieie<0.0105){
+             if (isoCh <5 && correctedIsoGam < 2.75 && hoe <0.05 && sieie<0.0105){
                 pass=1;
              }
         }

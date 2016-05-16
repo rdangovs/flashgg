@@ -20,6 +20,8 @@ struct PlotInfo {
 
 };
 
+string outputDir = "~/www/EXO_Plots2/";
+
 vector<PlotInfo> getPlotDetails();
 void makeFancyPlot(TTree* tree, PlotInfo &info);
 void makeSimplePlot(TTree* tree, string var, int cat);
@@ -63,12 +65,12 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
     TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
 
-    cout << "Old has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
+    cout << "Pasquale's has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
 
-    cout << setw(24) << "Old" << setw(24) << "New" << setw(24) << "Compare" << endl;
+    cout << setw(24) << "Pasquale" << setw(24) << "Us" << setw(24) << "Compare" << endl;
     cout << setw(12) << "Centre" << setw(12) << "Height";
     cout << setw(12) << "Centre" << setw(12) << "Height";
-    cout << setw(12) << "new - old" << setw(12) << "\% diff";
+    cout << setw(12) << "Difference" << setw(12) << "\% diff";
     cout << endl;
     for(unsigned i=1;i<=h->GetNbinsX();i++){
         cout << setw(12) << h->GetBinCenter(i);
@@ -90,8 +92,8 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     histNew->SetLineColor(kRed);
     h->Draw();
     histNew->Draw("same");
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_comparisonplot.pdf",info.var.c_str(),info.category));
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_comparisonplot.png",info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_comparisonplot.pdf",outputDir.c_str(),info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_comparisonplot.png",outputDir.c_str(),info.var.c_str(),info.category));
 
     c2.Clear();
     h->SetMarkerColor(kBlack);
@@ -99,8 +101,8 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     h->SetMarkerStyle(20);
     h->SetLineWidth(2);
     h->Draw("E1");
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_Original.pdf",info.var.c_str(),info.category));
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_Original.png",info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_Pasquale.pdf",outputDir.c_str(),info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_Pasquale.png",outputDir.c_str(),info.var.c_str(),info.category));
 
 }
 
@@ -142,10 +144,9 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
     if (info.logYPlot){
         c2.SetLogy();
     }
-    //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-    //c2.Print(Form("/afs/cern.ch/work/j/jwright/public/Louie/NewPlots/%s_cat%d_plot.png",info.var.c_str(),info.category));
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_plot.pdf",info.var.c_str(),info.category));
-    c2.Print(Form("~/www/EXO_Plots/%s_cat%d_plot.png",info.var.c_str(),info.category));
+
+    c2.Print(Form("%s%s_cat%d_plot.pdf",outputDir.c_str(),info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_plot.png",outputDir.c_str(),info.var.c_str(),info.category));
 }
 
 vector<PlotInfo> getPlotDetails(){
