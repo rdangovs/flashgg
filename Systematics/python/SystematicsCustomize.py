@@ -138,6 +138,7 @@ def customizeSystematicsForBackground(process):
                 pset.SetupUncertainties = False
 
 def customizeSystematicsForData(process):
+    print "LC DEBUG ABOUT TO CUSTOMIZE DATA SYSTEMATICS"
     customizePhotonSystematicsForData(process)
     customizeLeptonSystematicsForData(process)
     customizeJetSystematicsForData(process)
@@ -157,12 +158,14 @@ def customizeVPSetForData(systs, phScaleBins):
     return newvpset
 
 def customizePhotonSystematicsForData(process):
+    print "DEBUG CUSTOMIZING customizePhotonSystematicsForData "
     # By default remove the systematic entirely (central value and shifts)
     # For scale: put in central value, but omit shifts
     # TODO: this is wrong for sigE/E and possibly others - check!
 
     photonScaleBinsData = getattr(process,'photonScaleBinsData',None)
     if hasattr(process,'photonScaleBinsData'):
+        print "DEBUG passed  if hasattr(process,'photonScaleBinsData'): condition"
         print photonScaleBinsData, process.photonScaleBinsData
     process.flashggDiPhotonSystematics.SystMethods = customizeVPSetForData(process.flashggDiPhotonSystematics.SystMethods, photonScaleBinsData)
     process.flashggDiPhotonSystematics.SystMethods2D = customizeVPSetForData(process.flashggDiPhotonSystematics.SystMethods2D, photonScaleBinsData)
