@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <fstream>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ struct PlotInfo {
 
 };
 
-string outputDir = "~/www/EXO_Plots2/";
+string outputDir = "/afs/cern.ch/user/j/jwright/www/EXO_Plots_17_05/";
 
 vector<PlotInfo> getPlotDetails();
 void makeFancyPlot(TTree* tree, PlotInfo &info);
@@ -32,7 +33,7 @@ void ExoPlotMaker(){
     gROOT->SetBatch(1);
     TCanvas c1("c1","c1",500,500);
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_17_05.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -54,7 +55,17 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     }else{
         cat = "EBEE";
     }
-    cout << "Comparing " << info.var << " plots in category " << cat << endl;
+
+    ofstream file;
+    string filePath = Form("%sComparison%s.txt",outputDir.c_str(),cat.c_str());
+    file.open(filePath.c_str());
+
+    file << "Comparing " << info.var << " plots in category " << cat << endl;
+    if (file.is_open()) {
+        cout << "Successfully opened " << filePath << endl;
+    }else{
+        cout << "Failed to open " << filePath << endl;
+    }
 
     TFile *_file0 = TFile::Open("/afs/cern.ch/user/m/musella/public/workspace/exo/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
     TTree *t_EBEB=(TTree*)_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
@@ -65,21 +76,21 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
     TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
 
-    cout << "Pasquale's has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
+    file << "Pasquale's has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
 
-    cout << setw(24) << "Pasquale" << setw(24) << "Us" << setw(24) << "Compare" << endl;
-    cout << setw(12) << "Centre" << setw(12) << "Height";
-    cout << setw(12) << "Centre" << setw(12) << "Height";
-    cout << setw(12) << "Difference" << setw(12) << "\% diff";
-    cout << endl;
+    file << setw(24) << "Pasquale" << setw(24) << "Us" << setw(24) << "Compare" << endl;
+    file << setw(12) << "Centre" << setw(12) << "Height";
+    file << setw(12) << "Centre" << setw(12) << "Height";
+    file << setw(12) << "Difference" << setw(12) << "\% diff";
+    file << endl;
     for(unsigned i=1;i<=h->GetNbinsX();i++){
-        cout << setw(12) << h->GetBinCenter(i);
-        cout << setw(12) << h->GetBinContent(i);
-        cout << setw(12) << histNew->GetBinCenter(i);
-        cout << setw(12) << histNew->GetBinContent(i);
-        cout << setw(12) << histNew->GetBinContent(i) - h->GetBinContent(i);
-        cout << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
-        cout << endl;
+        file << setw(12) << h->GetBinCenter(i);
+        file << setw(12) << h->GetBinContent(i);
+        file << setw(12) << histNew->GetBinCenter(i);
+        file << setw(12) << histNew->GetBinContent(i);
+        file << setw(12) << histNew->GetBinContent(i) - h->GetBinContent(i);
+        file << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
+        file << endl;
     }
     TCanvas c2("c2");
     if (info.logXPlot){
@@ -104,6 +115,7 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
     c2.Print(Form("%s%s_cat%d_Pasquale.pdf",outputDir.c_str(),info.var.c_str(),info.category));
     c2.Print(Form("%s%s_cat%d_Pasquale.png",outputDir.c_str(),info.var.c_str(),info.category));
 
+    file.close();
 }
 
 
@@ -290,7 +302,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "leadChargedHadronIso";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 400;
+    info.xMax = 5;
     info.category = 0;
     info.title = "Leading Photon Charged Hadron Isolation";
     info.xLabel = "C.H.I.";
@@ -304,7 +316,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "subLeadChargedHadronIso";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 300;
+    info.xMax = 5;
     info.category = 0;
     info.title = "Subleading Photon Charged Hadron Isolation";
     info.xLabel = "CHI";
@@ -318,7 +330,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "leadPfPhoIso03";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 150;
+    info.xMax = 6;
     info.category = 0;
     info.title = "Leading Photon PF Photon Isolation 03";
     info.xLabel = "PFPI";
@@ -332,7 +344,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "subLeadPfPhoIso03";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 150;
+    info.xMax = 4;
     info.category = 0;
     info.title = "Subleading Photon PF Photon Isolation 03";
     info.xLabel = "PFPI";
@@ -346,7 +358,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "leadFull5x5_sigmaIetaIeta";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 0.07;
+    info.xMax = 0.04;
     info.category = 0;
     info.title = "Leading Photon #sigma_{i#eta i#eta}";
     info.xLabel = "#sigma_{i#eta i#eta}";
@@ -360,7 +372,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "subLeadFull5x5_sigmaIetaIeta";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 0.07;
+    info.xMax = 0.04;
     info.category = 0;
     info.title = "Subleading Photon #sigma_{i#eta i#eta}";
     info.xLabel = "#sigma_{i#eta i#eta}";
@@ -374,7 +386,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "leadFull5x5_r9";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 1.3;
+    info.xMax = 1.1;
     info.category = 0;
     info.title = "Leading Photon Full 5x5 R_{9}";
     info.xLabel = "R_{9}";
@@ -388,7 +400,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "subLeadFull5x5_r9";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 1.3;
+    info.xMax = 1.1;
     info.category = 0;
     info.title = "Subleading Photon Full 5x5 R_{9}";
     info.xLabel = "R_{9}";
@@ -402,7 +414,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "leadHadronicOverEm";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 1.5;
+    info.xMax = 0.06;
     info.category = 0;
     info.title = "Leading Photon Hadronic over EM";
     info.xLabel = "HoEM";
@@ -416,7 +428,7 @@ vector<PlotInfo> getPlotDetails(){
     info.var = "subLeadHadronicOverEm";
     info.nBins = 34;
     info.xMin = 0;
-    info.xMax = 1.5;
+    info.xMax = 0.06;
     info.category = 0;
     info.title = "Subleading Photon Hadronic over EM";
     info.xLabel = "HoEM";
