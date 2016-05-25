@@ -8,7 +8,7 @@ using namespace std;
 namespace flashgg {
 
     IdleWatchdog::IdleWatchdog( const edm::ParameterSet &iConfig ) :
-        minIdleFraction_( iConfig.getUntrackedParameter<double>( "minIdleFraction", 0.2 ) ),
+        minIdleFraction_( iConfig.getUntrackedParameter<double>( "minIdleFraction", 0.001 ) ),
         checkEvery_( iConfig.getUntrackedParameter<int>( "checkEvery", 1000 ) ),
         tolerance_( iConfig.getUntrackedParameter<int>( "tolerance", 5 ) )
     {

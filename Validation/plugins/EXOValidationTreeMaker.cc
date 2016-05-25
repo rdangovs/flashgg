@@ -294,18 +294,18 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
             
             if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
-                 std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
+                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
                 continue;}
             else {
-                 std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
+                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
             }
             if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
                 
-                 std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
+                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
                 continue;
                 }
             else {
-                 std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
+                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
             }
 
 
@@ -317,7 +317,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }
         
         if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
-        std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
         //Fill struct
         eInfo.eventID    = event_number;
         eInfo.mgg    = diPhotons->ptrAt(maxDiphoIndex)->mass();
@@ -388,6 +387,9 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
             //std::cout << " PASS" << endl;
             diphotonTree->Fill();
+            std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
+            std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
+            //std::cout << " CORRECTED mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotonsSystematics->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
         }/*else{
             std::cout << " FAIL" << endl;
         }*/
@@ -467,7 +469,7 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
         if (fabs(eta) >= 2.2 && fabs(eta)<2.5 ){ A=0.22 ; kappa =3e-3;}
     
     float corrIsoGam = alpha + isoGam - rho*A  - kappa *pt;
-    std::cout << "DEBUG cpriginal isoGam " << isoGam << " corrected isoGHam " << corrIsoGam << " : alpha " << alpha << " A  " << A << " kappa " << kappa <<  " rho " << rho << std::endl;
+    //std::cout << "DEBUG cpriginal isoGam " << isoGam << " corrected isoGHam " << corrIsoGam << " : alpha " << alpha << " A  " << A << " kappa " << kappa <<  " rho " << rho << std::endl;
     return corrIsoGam;
 
 
