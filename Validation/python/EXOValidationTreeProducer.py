@@ -15,7 +15,7 @@ process.load("flashgg.Systematics.flashggJetSystematics_cfi")
 process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 # +++++ the number of processed events
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 10 ) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 1000 ) )
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 500 )
 
 # +++++ the source file
@@ -56,6 +56,10 @@ process.flashggUnpackedJets = cms.EDProducer("FlashggVectorVectorJetUnpacker",
 																						                                              NCollections = cms.uint32(8)
 																																													                                             )
 	 
+hltPaths = ["HLT_DoublePhoton85*","HLT_Photon250_NoHE*","HLT_DoublePhoton60*"]
+process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
+process.hltHighLevel.HLTPaths = hltPaths
+
 process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
                                                             DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
 																														rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
@@ -65,6 +69,7 @@ process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTree
 process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True) )
 
 process.p = cms.Path( 
+    process.hltHighLevel*
     process.flashggDiPhotonSystematics*
     process.flashggEXOValidationTreeMaker 
     )
