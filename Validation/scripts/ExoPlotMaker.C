@@ -21,7 +21,7 @@ struct PlotInfo {
 
 };
 
-string outputDir = "/afs/cern.ch/user/j/jwright/www/EXO_Plots_17_05/";
+string outputDir = "/afs/cern.ch/user/j/jwright/www/EXO_Plots_31_05-16/";
 
 vector<PlotInfo> getPlotDetails();
 void makeFancyPlot(TTree* tree, PlotInfo &info);
@@ -33,7 +33,7 @@ void ExoPlotMaker(){
     gROOT->SetBatch(1);
     TCanvas c1("c1","c1",500,500);
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_17_05.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_31-05-16.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -67,7 +67,7 @@ void compareWithEXO(TTree *tree, PlotInfo &info){
         cout << "Failed to open " << filePath << endl;
     }
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/user/m/musella/public/workspace/exo/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
     TTree *t_EBEB=(TTree*)_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
     t_EBEB->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax));
     TH1F *h = (TH1F*)gPad->GetPrimitive("h");
