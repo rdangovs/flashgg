@@ -187,17 +187,17 @@ private:
     //EDGetTokenT< edm::View<reco::GenJet> >               genJetToken_;
     //EDGetTokenT< edm::View<flashgg::Jet> >               jetDzToken_;
     //std::vector<edm::EDGetTokenT<View<flashgg::Jet> > >  tokenJets_;
-    //std::vector<edm::InputTag>                           inputTagJets_;
-    EDGetTokenT< edm::View<flashgg::DiPhotonCandidate> > diPhotonToken_;
-    EDGetTokenT<double> rhoToken_;
     //EDGetTokenT< View<reco::Vertex> >                    vertexToken_;
     //EDGetTokenT< VertexCandidateMap > vertexCandidateMapToken_;
 
     //edm::InputTag 					qgVariablesInputTag;
     //edm::EDGetTokenT<edm::ValueMap<float>> 		qgToken;
 
-    //typedef std::vector<edm::Handle<edm::View<flashgg::Jet> > > JetCollectionVector;
+    std::vector<edm::InputTag>                           inputTagJets_;
+    EDGetTokenT< edm::View<flashgg::DiPhotonCandidate> > diPhotonToken_;
+    EDGetTokenT<double> rhoToken_;
 
+    typedef std::vector<edm::Handle<edm::View<flashgg::Jet> > > JetCollectionVector;
 
     TTree     *diphotonTree;
 
@@ -220,7 +220,7 @@ EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig
     //genPartToken_( consumes<View<reco::GenParticle> >( iConfig.getUntrackedParameter<InputTag> ( "GenParticleTag", InputTag( "prunedGenParticles" ) ) ) ),
     //genJetToken_( consumes<View<reco::GenJet> >( iConfig.getUntrackedParameter<InputTag> ( "GenJetTag", InputTag( "slimmedGenJets" ) ) ) ),
     //jetDzToken_   ( consumes<View<flashgg::Jet> >( iConfig.getParameter<InputTag>( "JetTagDz" ) ) ),
-    //inputTagJets_( iConfig.getParameter<std::vector<edm::InputTag> >( "inputTagJets" ) ),
+    inputTagJets_( iConfig.getParameter<std::vector<edm::InputTag> >( "inputTagJets" ) ),
     diPhotonToken_( consumes<View<flashgg::DiPhotonCandidate> >( iConfig.getParameter<InputTag> ( "DiPhotonTag" ) ) ),
     rhoToken_( consumes<double>( iConfig.getParameter<edm::InputTag>( "rhoFixedGridCollection" ) ) ),
     //vertexToken_( consumes<View<reco::Vertex> >( iConfig.getUntrackedParameter<InputTag> ( "VertexTag", InputTag( "offlineSlimmedPrimaryVertices" ) ) ) ),
@@ -276,7 +276,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     float boundaryEB(1.4442);
     float boundaryEELo(1.566), boundaryEEHi(2.5);
     int leadCat(-1), subLeadCat(-1);
-    
 
     Handle<View<flashgg::DiPhotonCandidate> > diPhotons;
     iEvent.getByToken( diPhotonToken_, diPhotons );
@@ -287,36 +286,36 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     iEvent.getByToken( rhoToken_, rhoHandle );
     const double rhoFixedGrd = *( rhoHandle.product() );
 
+    
+    //Pick highest pt diphoton
+    float maxDiphoPt(0.0);
+    int  maxDiphoIndex(-1);
+    for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
         
-        //Pick highest pt diphoton
-        float maxDiphoPt(0.0);
-        int  maxDiphoIndex(-1);
-        for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
-            
-            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
-                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
-                continue;}
-            else {
-                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
-            }
-            if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
-                
-                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
-                continue;
-                }
-            else {
-                 //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
-            }
-
-
-            float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
-            if (tempPt > maxDiphoPt){
-                maxDiphoPt = tempPt;
-                maxDiphoIndex = diphoIndex;
-            }
+        if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
+             //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
+            continue;}
+        else {
+             //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
         }
-        
-        if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
+        if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
+            
+             //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
+            continue;
+            }
+        else {
+             //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
+        }
+
+
+        float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
+        if (tempPt > maxDiphoPt){
+            maxDiphoPt = tempPt;
+            maxDiphoIndex = diphoIndex;
+        }
+    }
+    
+    if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
         //Fill struct
         eInfo.eventID    = event_number;
         eInfo.mgg    = diPhotons->ptrAt(maxDiphoIndex)->mass();
@@ -393,6 +392,27 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }/*else{
             std::cout << " FAIL" << endl;
         }*/
+
+
+    //Dump information on extra objects
+        std::cout << "EXTRA OBJECTS:" << std::endl;
+        std::cout << "Jets:" << std::endl;
+        unsigned jetCollectionIndex = diPhotons->ptrAt(maxDiphoIndex)->jetCollectionIndex();
+        JetCollectionVector Jets(inputTagJets_.size());
+        for (size_t i=0;i<inputTagJets_.size();i++){
+            iEvent.getByLabel(inputTagJets_[i],Jets[i]);
+        }
+
+        for (size_t i=0;i<Jets[jetCollectionIndex]->size();i++){
+            Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
+            std::cout << setw(6)  << i;
+            std::cout << setw(12) << jet->pt() << setw(12) << jet->eta();
+            std::cout << setw(12) << jet->phi() << std::endl;
+        }
+
+
+
+
     }/*else{
         std::cout << "Event has no diphotons" << std::endl;
     }*/
