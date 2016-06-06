@@ -53,8 +53,7 @@ process.TFileService = cms.Service("TFileService",fileName  = cms.string("exoVal
 
 process.flashggUnpackedJets = cms.EDProducer("FlashggVectorVectorJetUnpacker",
                                              JetsTag = cms.InputTag("flashggFinalJets"),
-																						                                              NCollections = cms.uint32(8)
-																																													                                             )
+                                             NCollections = cms.uint32(8))
 	 
 hltPaths = ["HLT_DoublePhoton85*","HLT_Photon250_NoHE*","HLT_DoublePhoton60*"]
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
@@ -69,6 +68,7 @@ process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTree
 process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True) )
 
 process.p = cms.Path( 
+    process.flashggUnpackedJets+
     process.hltHighLevel*
     process.flashggDiPhotonSystematics*
     process.flashggEXOValidationTreeMaker 
