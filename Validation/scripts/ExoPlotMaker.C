@@ -21,7 +21,7 @@ struct PlotInfo {
 
 };
 
-string outputDir = "/afs/cern.ch/user/j/jwright/www/EXO_Plots_31_05-16/";
+string outputDir = "/afs/cern.ch/user/j/jwright/www/EXO_Plots_ExtraObjects/";
 
 vector<PlotInfo> getPlotDetails();
 void makeFancyPlot(TTree* tree, PlotInfo &info);
@@ -33,7 +33,8 @@ void ExoPlotMaker(){
     gROOT->SetBatch(1);
     TCanvas c1("c1","c1",500,500);
 
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_31-05-16.root");
+    //TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_31-05-16.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/private/EXO_Diphoton/EXO_7_6_3/src/myjobs/output.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -437,6 +438,49 @@ vector<PlotInfo> getPlotDetails(){
 
     info.category = 1;
     plotInfo.push_back(info);
+
+    //Jet Multiplicity pt > 20
+    info.var = "jetMultiplicity_EGT20";
+    info.nBins = 10;
+    info.xMin = 1;
+    info.xMax = 11;
+    info.category = 0;
+    info.title = "Jet Multiplicity p_{T} > 20 GeV";
+    info.xLabel = "N";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Jet Multiplicity pt > 30
+    info.var = "jetMultiplicity_EGT30";
+    info.nBins = 10;
+    info.xMin = 1;
+    info.xMax = 11;
+    info.category = 0;
+    info.title = "Jet Multiplicity p_{T} > 30 GeV";
+    info.xLabel = "N";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Jet Multiplicity pt > 40
+    info.var = "jetMultiplicity_EGT40";
+    info.nBins = 10;
+    info.xMin = 1;
+    info.xMax = 11;
+    info.category = 0;
+    info.title = "Jet Multiplicity p_{T} > 40 GeV";
+    info.xLabel = "N";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
 
     return plotInfo;
 }

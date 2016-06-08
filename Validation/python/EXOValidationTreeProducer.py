@@ -15,8 +15,8 @@ process.load("flashgg.Systematics.flashggJetSystematics_cfi")
 process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 # +++++ the number of processed events
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 1000 ) )
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 500 )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1000 )
 
 # +++++ the source file
 process.source = cms.Source("PoolSource",
@@ -59,9 +59,11 @@ hltPaths = ["HLT_DoublePhoton85*","HLT_Photon250_NoHE*","HLT_DoublePhoton60*"]
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 process.hltHighLevel.HLTPaths = hltPaths
 
+from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
 process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
+                                                            inputTagJets= UnpackedJetCollectionVInputTag,
                                                             DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
-																														rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
+                                                            rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                                             )
 #
 
