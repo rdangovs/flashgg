@@ -1,0 +1,13 @@
+{
+	"processes" : {
+	"Data" : [ 
+
+		"/DoubleEG/musella-EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2-0e9662de1aab60c5025198286b2fffa1/USER",
+		"/DoubleEG/sethzenz-RunIIFall15DR76-1_3_0-25ns-1_3_0-v0-Run2015D-16Dec2015-v2-b7e5c192bb12d549953ce69d2b654ac8/USER"
+
+	    ]
+
+	},
+	
+	"cmdLine" : "campaign=EXOMoriond16_v1_38T lumiMask=/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-260627_13TeV_PromptReco_Collisions15_25ns_JSON_Silver_v2.txt"
+}
