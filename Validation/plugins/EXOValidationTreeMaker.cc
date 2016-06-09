@@ -118,6 +118,7 @@ struct diphotonInfo {
     int   subLeadPassElectronVeto;
    
     //Extra objects
+    int   jetMultiplicity;
     int   jetMultiplicity_EGT20;
     int   jetMultiplicity_EGT30;
     int   jetMultiplicity_EGT40;
@@ -160,6 +161,7 @@ struct diphotonInfo {
         leadPassElectronVeto = -999;
         subLeadPassElectronVeto = -999;
 
+        jetMultiplicity = -999;
         jetMultiplicity_EGT20 = -999;
         jetMultiplicity_EGT30 = -999;
         jetMultiplicity_EGT40 = -999;
@@ -288,6 +290,7 @@ EXOValidationTreeMaker::~EXOValidationTreeMaker()
 void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
+    eInfo.init();
 
     /*
     if( debug_ ) {
@@ -390,6 +393,14 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
             std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
             std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
+            std::cout << setw(12) << "pT" << setw(12) << "Eta" << setw(12) << "Phi" << std::endl;
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta();
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi() << std::endl;
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta();
+            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi() << std::endl;
+
             //Dump information on extra objects
             std::cout << "EXTRA OBJECTS:" << std::endl;
             std::cout << "Jets:" << std::endl;
@@ -436,15 +447,25 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             }
 
             //Jet multiplicities
+            unsigned jet_count = 0;
             unsigned EGT_20_count = 0;
             unsigned EGT_30_count = 0;
             unsigned EGT_40_count = 0;
 
             for (size_t i=0;i<Jets[jetCollectionIndex]->size();i++){
                 Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
+
+                float dR_leadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
+                float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
+                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) {
+                    std::cout << setw(6) << i << " --- Photon Overlap --- " << std::endl;
+                    continue;
+                }
+
                 std::cout << setw(6)  << i;
                 std::cout << setw(12) << jet->pt() << setw(12) << jet->eta();
                 std::cout << setw(12) << jet->phi() << std::endl;
+                jet_count++;
                 if (jet->pt() > 20) EGT_20_count++;
                 if (jet->pt() > 30) EGT_30_count++;
                 if (jet->pt() > 40) EGT_40_count++;
@@ -452,6 +473,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             std::cout << setw(12) << "EGT_20" << setw(12) << "EGT_30" << setw(12) << "EGT_40" << std::endl;
             std::cout << setw(12) << EGT_20_count << setw(12) << EGT_30_count << setw(12) << EGT_40_count << std::endl;
 
+            eInfo.jetMultiplicity = jet_count;
             eInfo.jetMultiplicity_EGT20 = EGT_20_count;
             eInfo.jetMultiplicity_EGT30 = EGT_30_count;
             eInfo.jetMultiplicity_EGT40 = EGT_40_count;
@@ -464,6 +486,11 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             int subleadJetIndex(-1);
             for (unsigned i=0;i<Jets[jetCollectionIndex]->size();i++){
                 Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
+
+                float dR_leadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
+                float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
+                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
+
                 if (jet->pt() > leadPt){
                     leadPt = jet->pt();
                     subleadJetIndex = leadJetIndex;
@@ -472,6 +499,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
                     subleadPt = jet->pt();
                     subleadJetIndex = i;
                 }
+
             }
 
             if (leadJetIndex != -1 && subleadJetIndex != -1){
@@ -486,8 +514,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
                 eInfo.dijetMass = (leadJet->p4() + subleadJet->p4()).M();
                 eInfo.dijetDeltaEta = fabs(leadJet->eta() - subleadJet->eta());
                 eInfo.dijetZeppenfeld = fabs(diPhotons->ptrAt(maxDiphoIndex)->eta() - 0.5*(leadJet->eta()+subleadJet->eta()));
-                eInfo.dijetDeltaPhi_jj = deltaPhi(leadJet->phi() , subleadJet->phi());
-                eInfo.dijetDeltaPhi_ggjj = deltaPhi(diPhotons->ptrAt(maxDiphoIndex)->phi() , (leadJet->p4()+subleadJet->p4()).Phi());
+                eInfo.dijetDeltaPhi_jj = fabs(deltaPhi(leadJet->phi() , subleadJet->phi()));
+                eInfo.dijetDeltaPhi_ggjj = fabs(deltaPhi(diPhotons->ptrAt(maxDiphoIndex)->phi() , (leadJet->p4()+subleadJet->p4()).Phi()));
 
                 std::cout << "Lead Jet Pt = " << eInfo.dijetLeadPt << std::endl;
                 std::cout << "Sublead Jet Pt = " << eInfo.dijetSubleadPt << std::endl;
@@ -501,15 +529,12 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             }
 
             diphotonTree->Fill();
-        }/*else{
-            std::cout << " FAIL" << endl;
-        }*/
+
+        }
 
 
 
-    }/*else{
-        std::cout << "Event has no diphotons" << std::endl;
-    }*/
+    }
     event_number++;
 }
 
@@ -545,6 +570,7 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "subLeadIsSaturated " , &eInfo.subLeadIsSaturated  , Form("%s/I","subLeadIsSaturated"));
     diphotonTree->Branch( "leadPassElectronVeto " , &eInfo.leadPassElectronVeto  , Form("%s/I","leadPassElectronVeto"));
     diphotonTree->Branch( "subLeadPassElectronVeto " , &eInfo.subLeadPassElectronVeto  , Form("%s/I","subLeadPassElectronVeto"));
+    diphotonTree->Branch( "jetMultiplicity " , &eInfo.jetMultiplicity  , Form("%s/I","jetMultiplicity"));
     diphotonTree->Branch( "jetMultiplicity_EGT20 " , &eInfo.jetMultiplicity_EGT20  , Form("%s/I","jetMultiplicity_EGT20"));
     diphotonTree->Branch( "jetMultiplicity_EGT30 " , &eInfo.jetMultiplicity_EGT30  , Form("%s/I","jetMultiplicity_EGT30"));
     diphotonTree->Branch( "jetMultiplicity_EGT40 " , &eInfo.jetMultiplicity_EGT40  , Form("%s/I","jetMultiplicity_EGT40"));

@@ -18,6 +18,7 @@ struct PlotInfo {
     string yLabel;
     bool logXPlot;
     bool logYPlot;
+    string cuts;
 
 };
 
@@ -33,8 +34,8 @@ void ExoPlotMaker(){
     gROOT->SetBatch(1);
     TCanvas c1("c1","c1",500,500);
 
-    //TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_31-05-16.root");
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/private/EXO_Diphoton/EXO_7_6_3/src/myjobs/output.root");
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/output_extras.root");
+    //TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/private/EXO_Diphoton/EXO_7_6_3/src/flashgg/Validation/test.root");
     TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
     gStyle->SetOptStat(11111);
     gStyle->SetOptFit(11111);
@@ -48,93 +49,21 @@ void ExoPlotMaker(){
 
 }
 
-void compareWithEXO(TTree *tree, PlotInfo &info){
-
-    string cat;
-    if (info.category == 0){
-        cat = "EBEB";
-    }else{
-        cat = "EBEE";
-    }
-
-    ofstream file;
-    string filePath = Form("%sComparison%s.txt",outputDir.c_str(),cat.c_str());
-    file.open(filePath.c_str());
-
-    file << "Comparing " << info.var << " plots in category " << cat << endl;
-    if (file.is_open()) {
-        cout << "Successfully opened " << filePath << endl;
-    }else{
-        cout << "Failed to open " << filePath << endl;
-    }
-
-    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
-    TTree *t_EBEB=(TTree*)_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
-    t_EBEB->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax));
-    TH1F *h = (TH1F*)gPad->GetPrimitive("h");
-
-    TCut cut = Form("category==%d",info.category);
-    tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
-    TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
-
-    file << "Pasquale's has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
-
-    file << setw(24) << "Pasquale" << setw(24) << "Us" << setw(24) << "Compare" << endl;
-    file << setw(12) << "Centre" << setw(12) << "Height";
-    file << setw(12) << "Centre" << setw(12) << "Height";
-    file << setw(12) << "Difference" << setw(12) << "\% diff";
-    file << endl;
-    for(unsigned i=1;i<=h->GetNbinsX();i++){
-        file << setw(12) << h->GetBinCenter(i);
-        file << setw(12) << h->GetBinContent(i);
-        file << setw(12) << histNew->GetBinCenter(i);
-        file << setw(12) << histNew->GetBinContent(i);
-        file << setw(12) << histNew->GetBinContent(i) - h->GetBinContent(i);
-        file << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
-        file << endl;
-    }
-    TCanvas c2("c2");
-    if (info.logXPlot){
-        c2.SetLogx();
-    }
-    if (info.logYPlot){
-        c2.SetLogy();
-    }
-    h->SetLineColor(kBlue);
-    histNew->SetLineColor(kRed);
-    h->Draw();
-    histNew->Draw("same");
-    c2.Print(Form("%s%s_cat%d_comparisonplot.pdf",outputDir.c_str(),info.var.c_str(),info.category));
-    c2.Print(Form("%s%s_cat%d_comparisonplot.png",outputDir.c_str(),info.var.c_str(),info.category));
-
-    c2.Clear();
-    h->SetMarkerColor(kBlack);
-    h->SetStats(kFALSE);
-    h->SetMarkerStyle(20);
-    h->SetLineWidth(2);
-    h->Draw("E1");
-    c2.Print(Form("%s%s_cat%d_Pasquale.pdf",outputDir.c_str(),info.var.c_str(),info.category));
-    c2.Print(Form("%s%s_cat%d_Pasquale.png",outputDir.c_str(),info.var.c_str(),info.category));
-
-    file.close();
-}
-
-
-
-
-
-
-
-
-
-
-
-
 void makeFancyPlot(TTree* tree, PlotInfo &info){
 
     TCanvas c2("c2","c2",500,500);
-    TCut cut = Form("category==%d",info.category);
-    tree->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
+    
+    TCut cuts;
+    if (info.category >= 0 && !info.cuts.empty()){
+        cuts = Form("(%s) && (category==%d)",info.cuts.c_str(),info.category);
+    }else if (info.category >= 0 && info.cuts.empty()){
+        cuts = Form("(category==%d)",info.category);
+    }else{
+        cuts = "";
+    }
+
+    tree->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cuts);
+
     TH1F *h = (TH1F*)gPad->GetPrimitive("h");
 
     TH1F *hist = new TH1F(*h);
@@ -164,8 +93,10 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
 
 vector<PlotInfo> getPlotDetails(){
 
+
     vector<PlotInfo> plotInfo;
     PlotInfo info;
+    
     //mgg
     info.var = "mgg";
     info.nBins = 69;
@@ -442,8 +373,8 @@ vector<PlotInfo> getPlotDetails(){
     //Jet Multiplicity pt > 20
     info.var = "jetMultiplicity_EGT20";
     info.nBins = 10;
-    info.xMin = 1;
-    info.xMax = 11;
+    info.xMin = 0;
+    info.xMax = 10;
     info.category = 0;
     info.title = "Jet Multiplicity p_{T} > 20 GeV";
     info.xLabel = "N";
@@ -456,8 +387,8 @@ vector<PlotInfo> getPlotDetails(){
     //Jet Multiplicity pt > 30
     info.var = "jetMultiplicity_EGT30";
     info.nBins = 10;
-    info.xMin = 1;
-    info.xMax = 11;
+    info.xMin = 0;
+    info.xMax = 10;
     info.category = 0;
     info.title = "Jet Multiplicity p_{T} > 30 GeV";
     info.xLabel = "N";
@@ -470,8 +401,8 @@ vector<PlotInfo> getPlotDetails(){
     //Jet Multiplicity pt > 40
     info.var = "jetMultiplicity_EGT40";
     info.nBins = 10;
-    info.xMin = 1;
-    info.xMax = 11;
+    info.xMin = 0;
+    info.xMax = 10;
     info.category = 0;
     info.title = "Jet Multiplicity p_{T} > 40 GeV";
     info.xLabel = "N";
@@ -481,8 +412,221 @@ vector<PlotInfo> getPlotDetails(){
     info.category = 1;
     plotInfo.push_back(info);
 
+    //Leading Jet Pt
+    info.cuts = "dijetLeadPt > 0";
+
+    info.var = "dijetLeadPt";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 1000;
+    info.category = 0;
+    info.title = "Leading Jet p_{T}";
+    info.xLabel = "p_{T} (GeV)";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Subleading Jet Pt
+    info.var = "dijetSubleadPt";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 350;
+    info.category = 0;
+    info.title = "Subleading Jet p_{T}";
+    info.xLabel = "p_{T} (GeV)";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Leading Jet Eta
+    info.var = "dijetLeadEta";
+    info.nBins = 34;
+    info.xMin = -5;
+    info.xMax = 5;
+    info.category = 0;
+    info.title = "Leading Jet #eta";
+    info.xLabel = "#eta";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Subleading Jet Eta
+    info.var = "dijetSubleadEta";
+    info.nBins = 34;
+    info.xMin = -5;
+    info.xMax = 5;
+    info.category = 0;
+    info.title = "Leading Jet #eta";
+    info.xLabel = "#eta";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Dijet Invariant Mass
+    info.var = "dijetMass";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 2000;
+    info.category = 0;
+    info.title = "Dijet Invariant Mass";
+    info.xLabel = "Inv. Mass (GeV)";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Dijet Delta Eta
+    info.var = "dijetDeltaEta";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 8;
+    info.category = 0;
+    info.title = "Dijet Pseudorapidity Gap";
+    info.xLabel = "#Delta#eta";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Dijet Zeppenfeld
+    info.var = "dijetZeppenfeld";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 9;
+    info.category = 0;
+    info.title = "Dijet Zeppenfeld";
+    info.xLabel = "#eta^{*}";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Dijet Delta Phi jj
+    info.var = "dijetDeltaPhi_jj";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 3.14159;
+    info.category = 0;
+    info.title = "Azimuthal Gap between Lead/Sublead Jets";
+    info.xLabel = "#Delta#phi_{jj}";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+    //Dijet Delta Phi jj
+    info.var = "dijetDeltaPhi_ggjj";
+    info.nBins = 34;
+    info.xMin = 0;
+    info.xMax = 3.14159;
+    info.category = 0;
+    info.title = "Azimuthal Gap between Diphoton and Dijet";
+    info.xLabel = "#Delta#phi_{#gamma#gamma{jj}}";
+    info.yLabel = "";
+    plotInfo.push_back(info);
+
+    info.category = 1;
+    plotInfo.push_back(info);
+
+
+
+
+
+
+
+
+
 
     return plotInfo;
 }
+
+
+void compareWithEXO(TTree *tree, PlotInfo &info){
+
+    string cat;
+    if (info.category == 0){
+        cat = "EBEB";
+    }else{
+        cat = "EBEE";
+    }
+
+    ofstream file;
+    string filePath = Form("%sComparison%s.txt",outputDir.c_str(),cat.c_str());
+    file.open(filePath.c_str());
+
+    file << "Comparing " << info.var << " plots in category " << cat << endl;
+    if (file.is_open()) {
+        cout << "Successfully opened " << filePath << endl;
+    }else{
+        cout << "Failed to open " << filePath << endl;
+    }
+
+    TFile *_file0 = TFile::Open("/afs/cern.ch/work/j/jwright/public/Louie/full_analysis_spring15_7415v2_sync_v5_data_ecorr_cic2_final_ws.root");
+    TTree *t_EBEB=(TTree*)_file0->Get(Form("tree_data_cic2_%s",cat.c_str()));
+    t_EBEB->Draw(Form("%s>>h(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax));
+    TH1F *h = (TH1F*)gPad->GetPrimitive("h");
+
+    TCut cut = Form("category==%d",info.category);
+    tree->Draw(Form("%s>>histNew(%d,%f,%f)",info.var.c_str(),info.nBins,info.xMin,info.xMax),cut);
+    TH1F *histNew = (TH1F*)gPad->GetPrimitive("histNew");
+
+    file << "Pasquale's has " << h->Integral() << " events, new has " << histNew->Integral() << endl;
+
+    file << setw(24) << "Pasquale" << setw(24) << "Us" << setw(24) << "Compare" << endl;
+    file << setw(12) << "Centre" << setw(12) << "Height";
+    file << setw(12) << "Centre" << setw(12) << "Height";
+    file << setw(12) << "Difference" << setw(12) << "\% diff";
+    file << endl;
+    for(unsigned i=1;i<=h->GetNbinsX();i++){
+        file << setw(12) << h->GetBinCenter(i);
+        file << setw(12) << h->GetBinContent(i);
+        file << setw(12) << histNew->GetBinCenter(i);
+        file << setw(12) << histNew->GetBinContent(i);
+        file << setw(12) << histNew->GetBinContent(i) - h->GetBinContent(i);
+        file << setw(12) << 100*(histNew->GetBinContent(i) - h->GetBinContent(i))/h->GetBinContent(i);
+        file << endl;
+    }
+    TCanvas c2("c2");
+    if (info.logXPlot){
+        c2.SetLogx();
+    }
+    if (info.logYPlot){
+        c2.SetLogy();
+    }
+    h->SetLineColor(kBlue);
+    histNew->SetLineColor(kRed);
+    h->Draw();
+    histNew->Draw("same");
+    c2.Print(Form("%s%s_cat%d_comparisonplot.pdf",outputDir.c_str(),info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_comparisonplot.png",outputDir.c_str(),info.var.c_str(),info.category));
+
+    c2.Clear();
+    h->SetMarkerColor(kBlack);
+    h->SetStats(kFALSE);
+    h->SetMarkerStyle(20);
+    h->SetLineWidth(2);
+    h->Draw("E1");
+    c2.Print(Form("%s%s_cat%d_Pasquale.pdf",outputDir.c_str(),info.var.c_str(),info.category));
+    c2.Print(Form("%s%s_cat%d_Pasquale.png",outputDir.c_str(),info.var.c_str(),info.category));
+
+    file.close();
+
+
+}
+
+
+
 
 
