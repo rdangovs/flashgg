@@ -93,7 +93,6 @@ void makeFancyPlot(TTree* tree, PlotInfo &info){
 
 vector<PlotInfo> getPlotDetails(){
 
-
     vector<PlotInfo> plotInfo;
     PlotInfo info;
     
@@ -539,15 +538,6 @@ vector<PlotInfo> getPlotDetails(){
 
     info.category = 1;
     plotInfo.push_back(info);
-
-
-
-
-
-
-
-
-
 
     return plotInfo;
 }

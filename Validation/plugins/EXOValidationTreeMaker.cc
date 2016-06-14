@@ -92,6 +92,7 @@ namespace flashgg {
 
 struct diphotonInfo {
     int   eventID;
+    float weight;
     float mgg;
     float leadPt           ;
     float subLeadPt         ;
@@ -116,6 +117,9 @@ struct diphotonInfo {
     int   subLeadIsSaturated;
     int   leadPassElectronVeto;
     int   subLeadPassElectronVeto;
+    float nConv;
+    float pullConv;
+
    
     //Extra objects
     int   jetMultiplicity;
@@ -134,9 +138,11 @@ struct diphotonInfo {
     float dijetDeltaPhi_jj;
     float dijetDeltaPhi_ggjj;
 
+
     void init()
     {
         mgg          = -999;
+        weight       = -999;
         leadPt       = -999;
         subLeadPt     = -999;
         leadR9       = -999;
@@ -160,6 +166,8 @@ struct diphotonInfo {
         subLeadIsSaturated = -999;
         leadPassElectronVeto = -999;
         subLeadPassElectronVeto = -999;
+        nConv = -999;
+        pullConv = -999;
 
         jetMultiplicity = -999;
         jetMultiplicity_EGT20 = -999;
@@ -438,6 +446,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
                                          && !diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
             eInfo.leadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->passElectronVeto());
             eInfo.subLeadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->passElectronVeto());
+            eInfo.nConv = diPhotons->ptrAt(maxDiphoIndex)->nConv();
+            eInfo.pullConv = diPhotons->ptrAt(maxDiphoIndex)->pullConv();
 
             //Get the jets
             unsigned jetCollectionIndex = diPhotons->ptrAt(maxDiphoIndex)->jetCollectionIndex();
@@ -570,6 +580,9 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "subLeadIsSaturated " , &eInfo.subLeadIsSaturated  , Form("%s/I","subLeadIsSaturated"));
     diphotonTree->Branch( "leadPassElectronVeto " , &eInfo.leadPassElectronVeto  , Form("%s/I","leadPassElectronVeto"));
     diphotonTree->Branch( "subLeadPassElectronVeto " , &eInfo.subLeadPassElectronVeto  , Form("%s/I","subLeadPassElectronVeto"));
+    diphotonTree->Branch( "nConv " , &eInfo.nConv  , Form("%s/F","nConv"));
+    diphotonTree->Branch( "pullConv " , &eInfo.pullConv  , Form("%s/F","pullConv"));
+
     diphotonTree->Branch( "jetMultiplicity " , &eInfo.jetMultiplicity  , Form("%s/I","jetMultiplicity"));
     diphotonTree->Branch( "jetMultiplicity_EGT20 " , &eInfo.jetMultiplicity_EGT20  , Form("%s/I","jetMultiplicity_EGT20"));
     diphotonTree->Branch( "jetMultiplicity_EGT30 " , &eInfo.jetMultiplicity_EGT30  , Form("%s/I","jetMultiplicity_EGT30"));
