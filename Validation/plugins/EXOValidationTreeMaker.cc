@@ -27,6 +27,7 @@
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "flashgg/MicroAOD/interface/VertexSelectorBase.h"
 #include "flashgg/DataFormats/interface/Photon.h"
+#include "flashgg/DataFormats/interface/Electron.h"
 #include "flashgg/DataFormats/interface/DiPhotonCandidate.h"
 #include "flashgg/MicroAOD/interface/PhotonIdUtils.h"
 
@@ -138,6 +139,20 @@ struct diphotonInfo {
     float dijetDeltaPhi_jj;
     float dijetDeltaPhi_ggjj;
 
+    //Electrons
+    float electronMultiplicity_EGT35;
+    float electronMultiplicity_EGT75;
+
+    //Dielectrons
+    float dielecLeadPt;
+    float dielecSubleadPt;
+    float dielecLeadEta;
+    float dielecSubleadEta;
+    float dielecMass;
+    float dielecDeltaEta;
+    float dielecZeppenfeld;
+    float dielecDeltaPhi_ee;
+    float dielecDeltaPhi_ggee;
 
     void init()
     {
@@ -174,7 +189,6 @@ struct diphotonInfo {
         jetMultiplicity_EGT30 = -999;
         jetMultiplicity_EGT40 = -999;
 
-
         dijetLeadPt = -999;
         dijetSubleadPt = -999;
         dijetLeadEta = -999;
@@ -184,6 +198,20 @@ struct diphotonInfo {
         dijetZeppenfeld = -999;
         dijetDeltaPhi_jj = -999;
         dijetDeltaPhi_ggjj = -999;
+        
+        electronMultiplicity_EGT35 = -999;;
+        electronMultiplicity_EGT75 = -999;;
+
+        dielecLeadPt = -999;
+        dielecSubleadPt = -999;
+        dielecLeadEta = -999;
+        dielecSubleadEta = -999;
+        dielecMass = -999;
+        dielecDeltaEta = -999;
+        dielecZeppenfeld = -999;
+        dielecDeltaPhi_ee = -999;
+        dielecDeltaPhi_ggee = -999;
+
     }
 };
 
@@ -214,27 +242,14 @@ private:
     virtual void beginJob() override;
     virtual void analyze( const edm::Event &, const edm::EventSetup & ) override;
     virtual void endJob() override;
-    
 
     // Additional methods
     void initEventStructure();
 
-
-    //bool GenRecoMatching(reco::GenJet genjet, const PtrVector<flashgg::Jet>& RecoJets){}
-    //EDGetTokenT< VertexCandidateMap > vertexCandidateMapTokenDz_;
-    //EDGetTokenT< VertexCandidateMap > vertexCandidateMapTokenAOD_;
-
-    //EDGetTokenT< edm::View<reco::GenParticle> >          genPartToken_;
-    //EDGetTokenT< edm::View<reco::GenJet> >               genJetToken_;
-    //EDGetTokenT< edm::View<flashgg::Jet> >               jetDzToken_;
     std::vector<edm::EDGetTokenT<View<flashgg::Jet> > >  tokenJets_;
-    //EDGetTokenT< View<reco::Vertex> >                    vertexToken_;
-    //EDGetTokenT< VertexCandidateMap > vertexCandidateMapToken_;
-
-    //edm::InputTag 					qgVariablesInputTag;
-    //edm::EDGetTokenT<edm::ValueMap<float>> 		qgToken;
 
     std::vector<edm::InputTag>                           inputTagJets_;
+    EDGetTokenT< edm::View<flashgg::Electron> > electronToken_;
     EDGetTokenT< edm::View<flashgg::DiPhotonCandidate> > diPhotonToken_;
     EDGetTokenT<double> rhoToken_;
 
@@ -244,39 +259,16 @@ private:
 
     diphotonInfo   eInfo;
     Int_t       event_number;
-    //std::string jetCollectionName;
-
-    //GenPartInfo jGenPhotonInfo;
-
-    //bool        usePUJetID;
-    //bool        photonJetVeto;
-    //bool        homeGenJetMatching_;
-    //bool        ZeroVertexOnly_;
     bool        debug_;
-    //bool        useVBFTagPhotonMatching_;
 
 };
 
 EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig ):
-    //genPartToken_( consumes<View<reco::GenParticle> >( iConfig.getUntrackedParameter<InputTag> ( "GenParticleTag", InputTag( "prunedGenParticles" ) ) ) ),
-    //genJetToken_( consumes<View<reco::GenJet> >( iConfig.getUntrackedParameter<InputTag> ( "GenJetTag", InputTag( "slimmedGenJets" ) ) ) ),
-    //jetDzToken_   ( consumes<View<flashgg::Jet> >( iConfig.getParameter<InputTag>( "JetTagDz" ) ) ),
     inputTagJets_( iConfig.getParameter<std::vector<edm::InputTag> >( "inputTagJets" ) ),
-
+    electronToken_( consumes<View<flashgg::Electron>>(iConfig.getParameter<edm::InputTag>("ElectronTag"))),
     diPhotonToken_( consumes<View<flashgg::DiPhotonCandidate> >( iConfig.getParameter<InputTag> ( "DiPhotonTag" ) ) ),
     rhoToken_( consumes<double>( iConfig.getParameter<edm::InputTag>( "rhoFixedGridCollection" ) ) ),
-    //vertexToken_( consumes<View<reco::Vertex> >( iConfig.getUntrackedParameter<InputTag> ( "VertexTag", InputTag( "offlineSlimmedPrimaryVertices" ) ) ) ),
-    //vertexCandidateMapToken_( consumes<VertexCandidateMap>( iConfig.getParameter<InputTag>( "VertexCandidateMapTag" ) ) ),
-
-    //qgVariablesInputTag( iConfig.getParameter<edm::InputTag>( "qgVariablesInputTag" ) ),
-
-    //usePUJetID( iConfig.getUntrackedParameter<bool>( "UsePUJetID"   , false ) ),
-    //photonJetVeto( iConfig.getUntrackedParameter<bool>( "PhotonJetVeto", true ) ),
-    //homeGenJetMatching_( iConfig.getUntrackedParameter<bool>( "homeGenJetMatching", false ) ),
-    //ZeroVertexOnly_( iConfig.getUntrackedParameter<bool>( "ZeroVertexOnly", false ) ),
     debug_( iConfig.getUntrackedParameter<bool>( "debug", false ) )
-    //useVBFTagPhotonMatching_( iConfig.getUntrackedParameter<bool>( "useVBFTagPhotonMatching", false ) )
-
 {
     for( uint i = 0; i < inputTagJets_.size(); i++ ) {
         auto token = consumes<View<flashgg::Jet> >(inputTagJets_[i]);
@@ -284,9 +276,6 @@ EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig
     }
 
     event_number = 0;
-    //jetCollectionName = iConfig.getParameter<string>( "StringTag" );
-    //qgToken	= consumes<edm::ValueMap<float>>( edm::InputTag( qgVariablesInputTag.label(), "qgLikelihood" ) );
-
 }
 
 EXOValidationTreeMaker::~EXOValidationTreeMaker()
@@ -299,17 +288,6 @@ void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
     eInfo.init();
-
-    /*
-    if( debug_ ) {
-        std::cout << "\e[0;31m";
-        std::cout << setw( 6 )  << "========================= "            << std::endl;
-        std::cout << setw( 12 ) << "Event" << setw( 12 ) << event_number   << std::endl;
-        std::cout << setw( 6 )  << "------------------------- "            << std::endl;
-        std::cout << "\e[0m" << std::endl;
-    }
-    */
-
 
     //Handle<View<reco::Vertex> > vtxs;
     //iEvent.getByToken( vertexToken_, vtxs );
@@ -492,8 +470,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
             //Get lead and sublead jets
             float leadPt(0), subleadPt(0);
-            int leadJetIndex(-1);
-            int subleadJetIndex(-1);
+            int leadIndex(-1);
+            int subleadIndex(-1);
             for (unsigned i=0;i<Jets[jetCollectionIndex]->size();i++){
                 Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
 
@@ -503,19 +481,19 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
                 if (jet->pt() > leadPt){
                     leadPt = jet->pt();
-                    subleadJetIndex = leadJetIndex;
-                    leadJetIndex = i;
+                    subleadIndex = leadIndex;
+                    leadIndex = i;
                 }else if (jet->pt() > subleadPt){
                     subleadPt = jet->pt();
-                    subleadJetIndex = i;
+                    subleadIndex = i;
                 }
 
             }
 
-            if (leadJetIndex != -1 && subleadJetIndex != -1){
+            if (leadIndex != -1 && subleadIndex != -1){
 
-                Ptr<flashgg::Jet> leadJet = Jets[jetCollectionIndex]->ptrAt(leadJetIndex);
-                Ptr<flashgg::Jet> subleadJet = Jets[jetCollectionIndex]->ptrAt(subleadJetIndex);
+                Ptr<flashgg::Jet> leadJet = Jets[jetCollectionIndex]->ptrAt(leadIndex);
+                Ptr<flashgg::Jet> subleadJet = Jets[jetCollectionIndex]->ptrAt(subleadIndex);
 
                 eInfo.dijetLeadPt = leadJet->pt();
                 eInfo.dijetSubleadPt = subleadJet->pt();
@@ -536,6 +514,77 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
                 std::cout << "Dijet Zeppenfeld = " << eInfo.dijetZeppenfeld << std::endl;
                 std::cout << "Dijet Delta Phi jj = " << eInfo.dijetDeltaPhi_jj << std::endl;
                 std::cout << "Dijet Delta Phit ggjj = " << eInfo.dijetDeltaPhi_ggjj << std::endl;
+
+            }
+
+            //ELECTRONS
+            Handle<View<flashgg::Electron>> electrons;
+            iEvent.getByToken(electronToken_,electrons);
+
+            if (electrons->size() > 0){
+                std::cout << "There are electrons present" << std::endl;
+                for (unsigned i=0;i<electrons->size();i++){
+                    Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
+                    std::cout << setw(12) << electron->pt();
+                    std::cout << setw(12) << electron->eta();
+                    std::cout << setw(12) << electron->phi() << std::endl;
+                }
+            }else{
+                std::cout << "There are no electrons present" << std::endl;
+            }
+
+            //Get the top two in p_T and multiplicities
+            unsigned EGT_35_count = 0;
+            unsigned EGT_75_count = 0;
+            leadPt=0;
+            subleadPt=0;
+            leadIndex=-1;
+            subleadIndex=-1;
+
+            for (unsigned i=0;i<electrons->size();i++){
+                Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
+
+                float dR_leadDP = deltaR(electron->eta(),electron->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
+                float dR_subLeadDP = deltaR(electron->eta(),electron->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
+                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
+
+                if (electron->pt() > leadPt){
+                    leadPt = electron->pt();
+                    subleadIndex = leadIndex;
+                    leadIndex = i;
+                }else if (electron->pt() > subleadPt){
+                    subleadPt = electron->pt();
+                    subleadIndex = i;
+                }
+                if (electron->pt() > 35) EGT_35_count++;
+                if (electron->pt() > 75) EGT_75_count++;
+            }
+
+            if (leadIndex != -1 && subleadIndex != -1){
+                
+                Ptr<flashgg::Electron> leadElectron = electrons->ptrAt(leadIndex);;
+                Ptr<flashgg::Electron> subleadElectron = electrons->ptrAt(subleadIndex);;
+
+                eInfo.dielecLeadPt = leadElectron->pt();
+                eInfo.dielecSubleadPt = subleadElectron->pt();
+                eInfo.dielecLeadEta = leadElectron->eta();
+                eInfo.dielecSubleadEta = subleadElectron->eta();
+                eInfo.dielecMass = (leadElectron->p4() + subleadElectron->p4()).M();
+                eInfo.dielecDeltaEta = fabs(leadElectron->eta() - subleadElectron->eta());
+                eInfo.dielecZeppenfeld = fabs(diPhotons->ptrAt(maxDiphoIndex)->eta() - 0.5*(leadElectron->eta()+subleadElectron->eta()));
+                eInfo.dielecDeltaPhi_ee = fabs(deltaPhi(leadElectron->phi() , subleadElectron->phi()));
+                eInfo.dielecDeltaPhi_ggee = fabs(deltaPhi(diPhotons->ptrAt(maxDiphoIndex)->phi() , (leadElectron->p4()+subleadElectron->p4()).Phi()));
+
+                std::cout << "Lead Electron Pt = " << eInfo.dielecLeadPt << std::endl;
+                std::cout << "Sublead Electron Pt = " << eInfo.dielecSubleadPt << std::endl;
+                std::cout << "Lead Electron Eta = " << eInfo.dielecLeadEta << std::endl;
+                std::cout << "Sublead Electron Eta = " << eInfo.dielecSubleadEta << std::endl;
+                std::cout << "Dielectron Mass = " << eInfo.dielecMass << std::endl;
+                std::cout << "Dielectron Delta Eta = " << eInfo.dielecDeltaEta << std::endl;
+                std::cout << "Dielectron Zeppenfeld = " << eInfo.dielecZeppenfeld << std::endl;
+                std::cout << "Dielectron Delta Phi ee = " << eInfo.dielecDeltaPhi_ee << std::endl;
+                std::cout << "Dielectron Delta Phit ggee = " << eInfo.dielecDeltaPhi_ggee << std::endl;
+
             }
 
             diphotonTree->Fill();
@@ -547,6 +596,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     }
     event_number++;
 }
+
 
 void
 EXOValidationTreeMaker::beginJob()
@@ -596,6 +646,17 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "dijetZeppenfeld          " , &eInfo.dijetZeppenfeld           , Form("%s/F","dijetZeppenfeld"));
     diphotonTree->Branch( "dijetDeltaPhi_jj          " , &eInfo.dijetDeltaPhi_jj           , Form("%s/F","dijetDeltaPhi_jj"));
     diphotonTree->Branch( "dijetDeltaPhi_ggjj          " , &eInfo.dijetDeltaPhi_ggjj           , Form("%s/F","dijetDeltaPhi_ggjj"));
+    diphotonTree->Branch( "electronMultiplicity_EGT35 " , &eInfo.electronMultiplicity_EGT35  , Form("%s/I","electronMultiplicity_EGT35"));
+    diphotonTree->Branch( "electronMultiplicity_EGT75 " , &eInfo.electronMultiplicity_EGT75  , Form("%s/I","electronMultiplicity_EGT75"));
+    diphotonTree->Branch( "dielecLeadPt          " , &eInfo.dielecLeadPt           , Form("%s/F","dielecLeadPt"));
+    diphotonTree->Branch( "dielecSubleadPt          " , &eInfo.dielecSubleadPt           , Form("%s/F","dielecSubleadPt"));
+    diphotonTree->Branch( "dielecLeadEta          " , &eInfo.dielecLeadEta           , Form("%s/F","dielecLeadEta"));
+    diphotonTree->Branch( "dielecSubleadEta          " , &eInfo.dielecSubleadEta           , Form("%s/F","dielecSubleadEta"));
+    diphotonTree->Branch( "dielecMass          " , &eInfo.dielecMass           , Form("%s/F","dielecMass"));
+    diphotonTree->Branch( "dielecDeltaEta          " , &eInfo.dielecDeltaEta           , Form("%s/F","dielecDeltaEta"));
+    diphotonTree->Branch( "dielecZeppenfeld          " , &eInfo.dielecZeppenfeld           , Form("%s/F","dielecZeppenfeld"));
+    diphotonTree->Branch( "dielecDeltaPhi_ee          " , &eInfo.dielecDeltaPhi_ee           , Form("%s/F","dielecDeltaPhi_ee"));
+    diphotonTree->Branch( "dielecDeltaPhi_ggee          " , &eInfo.dielecDeltaPhi_ggee           , Form("%s/F","dielecDeltaPhi_ggee"));
 
 }
 
