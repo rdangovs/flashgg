@@ -184,10 +184,10 @@ struct diphotonInfo {
         nConv = -999;
         pullConv = -999;
 
-        jetMultiplicity = -999;
-        jetMultiplicity_EGT20 = -999;
-        jetMultiplicity_EGT30 = -999;
-        jetMultiplicity_EGT40 = -999;
+        jetMultiplicity = 0;
+        jetMultiplicity_EGT20 = 0;
+        jetMultiplicity_EGT30 = 0;
+        jetMultiplicity_EGT40 = 0;
 
         dijetLeadPt = -999;
         dijetSubleadPt = -999;
@@ -199,8 +199,8 @@ struct diphotonInfo {
         dijetDeltaPhi_jj = -999;
         dijetDeltaPhi_ggjj = -999;
         
-        electronMultiplicity_EGT35 = -999;;
-        electronMultiplicity_EGT75 = -999;;
+        electronMultiplicity_EGT35 = 0;;
+        electronMultiplicity_EGT75 = 0;;
 
         dielecLeadPt = -999;
         dielecSubleadPt = -999;
@@ -211,6 +211,30 @@ struct diphotonInfo {
         dielecZeppenfeld = -999;
         dielecDeltaPhi_ee = -999;
         dielecDeltaPhi_ggee = -999;
+
+    }
+
+    void printExtraObjects(){
+
+        cout << "Jet Info" << endl;
+        cout << "Multiplciity:" << endl;
+        cout << setw(12) << "All" << setw(12) << ">20GeV" << setw(12) << ">30GeV" << setw(12) << ">40GeV" << endl;
+        cout << setw(12) << jetMultiplicity << setw(12) << jetMultiplicity_EGT20 << setw(12) << jetMultiplicity_EGT30 << setw(12) << jetMultiplicity_EGT40 << endl;
+        cout << "Dijet Kinematics" << endl;
+        cout << setw(12) << "Lead Pt" << setw(12) << "Sublead Pt" << setw(12) << "Lead Eta" << setw(12) << "Sublead Eta" << endl;
+        cout << setw(12) << dijetLeadPt << setw(12) << dijetSubleadPt << setw(12) << dijetLeadEta << setw(12) << dijetSubleadEta << endl;
+        cout << setw(12) << "Mass" << setw(12) << "dEta" << setw(12) << "Zepp" << setw(12) << "dPhi_jj" << setw(12) << "dPhi_ggjj" << endl;
+        cout << setw(12) << dijetMass << setw(12) << dijetDeltaEta << setw(12) << dijetZeppenfeld << setw(12) << dijetDeltaPhi_jj << setw(12) << dijetDeltaPhi_ggjj << endl;
+ 
+        cout << "Electron Info" << endl;
+        cout << "Multiplciity:" << endl;
+        cout << setw(12) << ">35GeV" << setw(12) << ">75GeV" << endl;
+        cout << setw(12) << electronMultiplicity_EGT35 << setw(12) << electronMultiplicity_EGT75 << endl;
+        cout << "Electron Kinematics" << endl;
+        cout << setw(12) << "Lead Pt" << setw(12) << "Sublead Pt" << setw(12) << "Lead Eta" << setw(12) << "Sublead Eta" << endl;
+        cout << setw(12) << dielecLeadPt << setw(12) << dielecSubleadPt << setw(12) << dielecLeadEta << setw(12) << dielecSubleadEta << endl;
+        cout << setw(12) << "Mass" << setw(12) << "dEta" << setw(12) << "Zepp" << setw(12) << "dPhi_ee" << setw(12) << "dPhi_ggee" << endl;
+        cout << setw(12) << dielecMass << setw(12) << dielecDeltaEta << setw(12) << dielecZeppenfeld << setw(12) << dielecDeltaPhi_ee << setw(12) << dielecDeltaPhi_ggee << endl;
 
     }
 };
@@ -261,6 +285,12 @@ private:
     Int_t       event_number;
     bool        debug_;
 
+    void FillDielectronInfo(Handle<View<flashgg::Electron>> &electrons,Ptr<flashgg::DiPhotonCandidate> diphoton);
+    void FillElectronInfo(Handle<View<flashgg::Electron>> &electrons,Ptr<flashgg::DiPhotonCandidate> diphoton);
+    void FillJetInfo(edm::Handle<edm::View<flashgg::Jet> > &jets,Ptr<flashgg::DiPhotonCandidate> diphoton);
+    void FillDijetInfo(edm::Handle<edm::View<flashgg::Jet> > &jets,Ptr<flashgg::DiPhotonCandidate> diphoton);
+    void FillDiphotonInfo(Ptr<flashgg::DiPhotonCandidate> diphoton);
+
 };
 
 EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig ):
@@ -289,10 +319,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 {
     eInfo.init();
 
-    //Handle<View<reco::Vertex> > vtxs;
-    //iEvent.getByToken( vertexToken_, vtxs );
-    //const PtrVector<reco::Vertex>& vtxs = primaryVertices->ptrVector();
-    
     //Set cat boundaries
     float boundaryEB(1.4442);
     float boundaryEELo(1.566), boundaryEEHi(2.5);
@@ -307,25 +333,16 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     iEvent.getByToken( rhoToken_, rhoHandle );
     const double rhoFixedGrd = *( rhoHandle.product() );
 
-    
     //Pick highest pt diphoton
     float maxDiphoPt(0.0);
     int  maxDiphoIndex(-1);
     for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
         
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
-             //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
-            continue;}
-        else {
-             //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon PASSED  photonID cuts" << std::endl;
+            continue;
         }
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
-            
-             //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
             continue;
-            }
-        else {
-             //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon PASSED  photonID cuts" << std::endl;
         }
 
         float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
@@ -333,6 +350,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             maxDiphoPt = tempPt;
             maxDiphoIndex = diphoIndex;
         }
+
     }
     
     if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
@@ -356,19 +374,19 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             eInfo.category = 1;
         }
 
-        eInfo.leadPt            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
-        eInfo.subLeadPt          = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
-        eInfo.leadEtaSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->eta();
-        eInfo.subLeadEtaSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->eta();
-
         //Preselection
         float ptCut(75),mggCutEBEB(230),mggCutEBEE(320);
-        bool passesPtCut = eInfo.leadPt > ptCut && eInfo.subLeadPt > ptCut;
-        bool passesLeadEtaSCCut = fabs(eInfo.leadEtaSC) < boundaryEEHi && !(fabs(eInfo.leadEtaSC) > boundaryEB && fabs(eInfo.leadEtaSC) < boundaryEELo);
-        bool passesSubLeadEtaSCCut = fabs(eInfo.subLeadEtaSC) < boundaryEEHi && !(fabs(eInfo.subLeadEtaSC) > boundaryEB && fabs(eInfo.subLeadEtaSC) < boundaryEELo);
-        bool passesOneBarrelEtaSCCut = fabs(eInfo.leadEtaSC) < boundaryEB || fabs(eInfo.subLeadEtaSC) < boundaryEB;
-        bool passesMassCut(false);
 
+        float diphotonLeadPt            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
+        float diphotonSubLeadPt         = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
+        float diphotonLeadEtaSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->eta();
+        float diphotonSubLeadEtaSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->eta();
+
+        bool passesPtCut = diphotonLeadPt > ptCut && diphotonSubLeadPt > ptCut;
+        bool passesLeadEtaSCCut = fabs(diphotonLeadEtaSC) < boundaryEEHi && !(fabs(diphotonLeadEtaSC) > boundaryEB && fabs(diphotonLeadEtaSC) < boundaryEELo);
+        bool passesSubLeadEtaSCCut = fabs(diphotonSubLeadEtaSC) < boundaryEEHi && !(fabs(diphotonSubLeadEtaSC) > boundaryEB && fabs(diphotonSubLeadEtaSC) < boundaryEELo);
+        bool passesOneBarrelEtaSCCut = fabs(diphotonLeadEtaSC) < boundaryEB || fabs(diphotonSubLeadEtaSC) < boundaryEB;
+        bool passesMassCut(false);
         if (eInfo.category == 0){
             passesMassCut = diPhotons->ptrAt(maxDiphoIndex)->mass() > mggCutEBEB;
         }else if (eInfo.category == 1){
@@ -377,226 +395,220 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
         if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
 
-            std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
-            std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
-            std::cout << setw(12) << "pT" << setw(12) << "Eta" << setw(12) << "Phi" << std::endl;
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta();
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi() << std::endl;
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta();
-            std::cout << setw(12) << diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi() << std::endl;
+            Ptr<flashgg::DiPhotonCandidate> diphoton = diPhotons->ptrAt(maxDiphoIndex);
+            FillDiphotonInfo(diphoton);
 
-            //Dump information on extra objects
-            std::cout << "EXTRA OBJECTS:" << std::endl;
-            std::cout << "Jets:" << std::endl;
-
-            //Fill struct
-            eInfo.eventID    = event_number;
-            eInfo.mgg    = diPhotons->ptrAt(maxDiphoIndex)->mass();
-            eInfo.leadPt            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pt();
-            eInfo.subLeadPt          = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pt();
-            eInfo.leadR9            = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->r9();
-            eInfo.subLeadR9          = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->r9();
-            eInfo.leadEtaSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->eta();
-            eInfo.subLeadEtaSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->eta();
-            eInfo.leadPhiSC         = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->superCluster()->phi();
-            eInfo.subLeadPhiSC      = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->superCluster()->phi();
-            eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->egChargedHadronIso();
-            //eInfo.leadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->chargedHadronIso();
-            eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->egPhotonIso();
-            //eInfo.leadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->pfPhoIso03();
-            eInfo.leadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_sigmaIetaIeta();
-            eInfo.leadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->full5x5_r9();
-            eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadTowOverEm();
-            //eInfo.leadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->hadronicOverEm();
-            //eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->chargedHadronIso();
-            eInfo.subLeadChargedHadronIso = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->egChargedHadronIso();
-            eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->egPhotonIso();
-            //eInfo.subLeadPfPhoIso03 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->pfPhoIso03();
-            eInfo.subLeadFull5x5_sigmaIetaIeta = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_sigmaIetaIeta();
-            eInfo.subLeadFull5x5_r9 = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->full5x5_r9();
-            eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadTowOverEm();
-            //eInfo.subLeadHadronicOverEm = diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->hadronicOverEm();
-            eInfo.leadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
-                                      && !diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
-            eInfo.subLeadIsSaturated = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
-                                         && !diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
-            eInfo.leadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->passElectronVeto());
-            eInfo.subLeadPassElectronVeto = (int)(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->passElectronVeto());
-            eInfo.nConv = diPhotons->ptrAt(maxDiphoIndex)->nConv();
-            eInfo.pullConv = diPhotons->ptrAt(maxDiphoIndex)->pullConv();
-
-            //Get the jets
+            //EXTRA OBJECTS
+            
+            //JETS
             unsigned jetCollectionIndex = diPhotons->ptrAt(maxDiphoIndex)->jetCollectionIndex();
             JetCollectionVector Jets(inputTagJets_.size());
             for (size_t i=0;i<inputTagJets_.size();i++){
                 iEvent.getByToken(tokenJets_[i],Jets[i]);
             }
-
-            //Jet multiplicities
-            unsigned jet_count = 0;
-            unsigned EGT_20_count = 0;
-            unsigned EGT_30_count = 0;
-            unsigned EGT_40_count = 0;
-
-            for (size_t i=0;i<Jets[jetCollectionIndex]->size();i++){
-                Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
-
-                float dR_leadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
-                float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
-                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) {
-                    std::cout << setw(6) << i << " --- Photon Overlap --- " << std::endl;
-                    continue;
-                }
-
-                std::cout << setw(6)  << i;
-                std::cout << setw(12) << jet->pt() << setw(12) << jet->eta();
-                std::cout << setw(12) << jet->phi() << std::endl;
-                jet_count++;
-                if (jet->pt() > 20) EGT_20_count++;
-                if (jet->pt() > 30) EGT_30_count++;
-                if (jet->pt() > 40) EGT_40_count++;
-            }
-            std::cout << setw(12) << "EGT_20" << setw(12) << "EGT_30" << setw(12) << "EGT_40" << std::endl;
-            std::cout << setw(12) << EGT_20_count << setw(12) << EGT_30_count << setw(12) << EGT_40_count << std::endl;
-
-            eInfo.jetMultiplicity = jet_count;
-            eInfo.jetMultiplicity_EGT20 = EGT_20_count;
-            eInfo.jetMultiplicity_EGT30 = EGT_30_count;
-            eInfo.jetMultiplicity_EGT40 = EGT_40_count;
-
-            //Dijets
-
-            //Get lead and sublead jets
-            float leadPt(0), subleadPt(0);
-            int leadIndex(-1);
-            int subleadIndex(-1);
-            for (unsigned i=0;i<Jets[jetCollectionIndex]->size();i++){
-                Ptr<flashgg::Jet> jet = Jets[jetCollectionIndex]->ptrAt(i);
-
-                float dR_leadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
-                float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
-                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
-
-                if (jet->pt() > leadPt){
-                    leadPt = jet->pt();
-                    subleadIndex = leadIndex;
-                    leadIndex = i;
-                }else if (jet->pt() > subleadPt){
-                    subleadPt = jet->pt();
-                    subleadIndex = i;
-                }
-
-            }
-
-            if (leadIndex != -1 && subleadIndex != -1){
-
-                Ptr<flashgg::Jet> leadJet = Jets[jetCollectionIndex]->ptrAt(leadIndex);
-                Ptr<flashgg::Jet> subleadJet = Jets[jetCollectionIndex]->ptrAt(subleadIndex);
-
-                eInfo.dijetLeadPt = leadJet->pt();
-                eInfo.dijetSubleadPt = subleadJet->pt();
-                eInfo.dijetLeadEta = leadJet->eta();
-                eInfo.dijetSubleadEta = subleadJet->eta();
-                eInfo.dijetMass = (leadJet->p4() + subleadJet->p4()).M();
-                eInfo.dijetDeltaEta = fabs(leadJet->eta() - subleadJet->eta());
-                eInfo.dijetZeppenfeld = fabs(diPhotons->ptrAt(maxDiphoIndex)->eta() - 0.5*(leadJet->eta()+subleadJet->eta()));
-                eInfo.dijetDeltaPhi_jj = fabs(deltaPhi(leadJet->phi() , subleadJet->phi()));
-                eInfo.dijetDeltaPhi_ggjj = fabs(deltaPhi(diPhotons->ptrAt(maxDiphoIndex)->phi() , (leadJet->p4()+subleadJet->p4()).Phi()));
-
-                std::cout << "Lead Jet Pt = " << eInfo.dijetLeadPt << std::endl;
-                std::cout << "Sublead Jet Pt = " << eInfo.dijetSubleadPt << std::endl;
-                std::cout << "Lead Jet Eta = " << eInfo.dijetLeadEta << std::endl;
-                std::cout << "Sublead Jet Eta = " << eInfo.dijetSubleadEta << std::endl;
-                std::cout << "Dijet Mass = " << eInfo.dijetMass << std::endl;
-                std::cout << "Dijet Delta Eta = " << eInfo.dijetDeltaEta << std::endl;
-                std::cout << "Dijet Zeppenfeld = " << eInfo.dijetZeppenfeld << std::endl;
-                std::cout << "Dijet Delta Phi jj = " << eInfo.dijetDeltaPhi_jj << std::endl;
-                std::cout << "Dijet Delta Phit ggjj = " << eInfo.dijetDeltaPhi_ggjj << std::endl;
-
-            }
+            edm::Handle<edm::View<flashgg::Jet>> jets = Jets[jetCollectionIndex];
+            //Filling jet info
+            FillJetInfo(jets,diphoton);
+            //Dijet info
+            FillDijetInfo(jets,diphoton);
 
             //ELECTRONS
             Handle<View<flashgg::Electron>> electrons;
             iEvent.getByToken(electronToken_,electrons);
-
-            if (electrons->size() > 0){
-                std::cout << "There are electrons present" << std::endl;
-                for (unsigned i=0;i<electrons->size();i++){
-                    Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
-                    std::cout << setw(12) << electron->pt();
-                    std::cout << setw(12) << electron->eta();
-                    std::cout << setw(12) << electron->phi() << std::endl;
-                }
-            }else{
-                std::cout << "There are no electrons present" << std::endl;
-            }
-
-            //Get the top two in p_T and multiplicities
-            unsigned EGT_35_count = 0;
-            unsigned EGT_75_count = 0;
-            leadPt=0;
-            subleadPt=0;
-            leadIndex=-1;
-            subleadIndex=-1;
-
-            for (unsigned i=0;i<electrons->size();i++){
-                Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
-
-                float dR_leadDP = deltaR(electron->eta(),electron->phi(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->phi());
-                float dR_subLeadDP = deltaR(electron->eta(),electron->phi(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta(),diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->phi());
-                if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
-
-                if (electron->pt() > leadPt){
-                    leadPt = electron->pt();
-                    subleadIndex = leadIndex;
-                    leadIndex = i;
-                }else if (electron->pt() > subleadPt){
-                    subleadPt = electron->pt();
-                    subleadIndex = i;
-                }
-                if (electron->pt() > 35) EGT_35_count++;
-                if (electron->pt() > 75) EGT_75_count++;
-            }
-
-            if (leadIndex != -1 && subleadIndex != -1){
-                
-                Ptr<flashgg::Electron> leadElectron = electrons->ptrAt(leadIndex);;
-                Ptr<flashgg::Electron> subleadElectron = electrons->ptrAt(subleadIndex);;
-
-                eInfo.dielecLeadPt = leadElectron->pt();
-                eInfo.dielecSubleadPt = subleadElectron->pt();
-                eInfo.dielecLeadEta = leadElectron->eta();
-                eInfo.dielecSubleadEta = subleadElectron->eta();
-                eInfo.dielecMass = (leadElectron->p4() + subleadElectron->p4()).M();
-                eInfo.dielecDeltaEta = fabs(leadElectron->eta() - subleadElectron->eta());
-                eInfo.dielecZeppenfeld = fabs(diPhotons->ptrAt(maxDiphoIndex)->eta() - 0.5*(leadElectron->eta()+subleadElectron->eta()));
-                eInfo.dielecDeltaPhi_ee = fabs(deltaPhi(leadElectron->phi() , subleadElectron->phi()));
-                eInfo.dielecDeltaPhi_ggee = fabs(deltaPhi(diPhotons->ptrAt(maxDiphoIndex)->phi() , (leadElectron->p4()+subleadElectron->p4()).Phi()));
-
-                std::cout << "Lead Electron Pt = " << eInfo.dielecLeadPt << std::endl;
-                std::cout << "Sublead Electron Pt = " << eInfo.dielecSubleadPt << std::endl;
-                std::cout << "Lead Electron Eta = " << eInfo.dielecLeadEta << std::endl;
-                std::cout << "Sublead Electron Eta = " << eInfo.dielecSubleadEta << std::endl;
-                std::cout << "Dielectron Mass = " << eInfo.dielecMass << std::endl;
-                std::cout << "Dielectron Delta Eta = " << eInfo.dielecDeltaEta << std::endl;
-                std::cout << "Dielectron Zeppenfeld = " << eInfo.dielecZeppenfeld << std::endl;
-                std::cout << "Dielectron Delta Phi ee = " << eInfo.dielecDeltaPhi_ee << std::endl;
-                std::cout << "Dielectron Delta Phit ggee = " << eInfo.dielecDeltaPhi_ggee << std::endl;
-
-            }
+            //electrons
+            FillElectronInfo(electrons,diphoton);
+            //dielectrons
+            FillDielectronInfo(electrons,diphoton);
 
             diphotonTree->Fill();
 
-        }
+            cout << "Diphoton passes selection" << endl;
+            eInfo.printExtraObjects();
 
+        }else{
+            cout << "Diphoton fails selection" << endl;
+        }
 
 
     }
     event_number++;
 }
 
+void EXOValidationTreeMaker::FillDielectronInfo(Handle<View<flashgg::Electron>> &electrons,Ptr<flashgg::DiPhotonCandidate> diphoton){
+
+    float leadPt(0), subleadPt(0);
+    int leadIndex(-1);
+    int subleadIndex(-1);
+
+     for (unsigned i=0;i<electrons->size();i++){
+        Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
+
+        float dR_leadDP = deltaR(electron->eta(),electron->phi(),diphoton->leadingPhoton()->eta(),diphoton->leadingPhoton()->phi());
+        float dR_subLeadDP = deltaR(electron->eta(),electron->phi(),diphoton->subLeadingPhoton()->eta(),diphoton->subLeadingPhoton()->phi());
+        if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
+
+        if (electron->pt() > leadPt){
+            leadPt = electron->pt();
+            subleadIndex = leadIndex;
+            leadIndex = i;
+        }else if (electron->pt() > subleadPt){
+            subleadPt = electron->pt();
+            subleadIndex = i;
+        }
+    }
+
+    if (leadIndex != -1 && subleadIndex != -1){
+        
+        Ptr<flashgg::Electron> leadElectron = electrons->ptrAt(leadIndex);;
+        Ptr<flashgg::Electron> subleadElectron = electrons->ptrAt(subleadIndex);;
+
+        eInfo.dielecLeadPt = leadElectron->pt();
+        eInfo.dielecSubleadPt = subleadElectron->pt();
+        eInfo.dielecLeadEta = leadElectron->eta();
+        eInfo.dielecSubleadEta = subleadElectron->eta();
+        eInfo.dielecMass = (leadElectron->p4() + subleadElectron->p4()).M();
+        eInfo.dielecDeltaEta = fabs(leadElectron->eta() - subleadElectron->eta());
+        eInfo.dielecZeppenfeld = fabs(diphoton->eta() - 0.5*(leadElectron->eta()+subleadElectron->eta()));
+        eInfo.dielecDeltaPhi_ee = fabs(deltaPhi(leadElectron->phi() , subleadElectron->phi()));
+        eInfo.dielecDeltaPhi_ggee = fabs(deltaPhi(diphoton->phi() , (leadElectron->p4()+subleadElectron->p4()).Phi()));
+
+    }
+
+}
+
+void EXOValidationTreeMaker::FillElectronInfo(Handle<View<flashgg::Electron>> &electrons,Ptr<flashgg::DiPhotonCandidate> diphoton){
+
+    unsigned EGT_35_count = 0;
+    unsigned EGT_75_count = 0;
+
+    for (unsigned i=0;i<electrons->size();i++){
+        Ptr<flashgg::Electron> electron = electrons->ptrAt(i);
+
+        float dR_leadDP = deltaR(electron->eta(),electron->phi(),diphoton->leadingPhoton()->eta(),diphoton->leadingPhoton()->phi());
+        float dR_subLeadDP = deltaR(electron->eta(),electron->phi(),diphoton->subLeadingPhoton()->eta(),diphoton->subLeadingPhoton()->phi());
+        if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
+
+        if (electron->pt() > 35) EGT_35_count++;
+        if (electron->pt() > 75) EGT_75_count++;
+    }
+
+    eInfo.electronMultiplicity_EGT35 = EGT_35_count; 
+    eInfo.electronMultiplicity_EGT75 = EGT_75_count; 
+
+}
+
+void EXOValidationTreeMaker::FillJetInfo(edm::Handle<edm::View<flashgg::Jet> > &jets,Ptr<flashgg::DiPhotonCandidate> diphoton){
+
+    unsigned jet_count = 0;
+    unsigned EGT_20_count = 0;
+    unsigned EGT_30_count = 0;
+    unsigned EGT_40_count = 0;
+
+    for (size_t i=0;i<jets->size();i++){
+        Ptr<flashgg::Jet> jet = jets->ptrAt(i);
+
+        float dR_leadDP = deltaR(jet->eta(),jet->phi(),diphoton->leadingPhoton()->eta(),diphoton->leadingPhoton()->phi());
+        float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diphoton->subLeadingPhoton()->eta(),diphoton->subLeadingPhoton()->phi());
+        if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) {
+            continue;
+        }
+
+        jet_count++;
+        if (jet->pt() > 20) EGT_20_count++;
+        if (jet->pt() > 30) EGT_30_count++;
+        if (jet->pt() > 40) EGT_40_count++;
+    }
+
+    eInfo.jetMultiplicity = jet_count;
+    eInfo.jetMultiplicity_EGT20 = EGT_20_count;
+    eInfo.jetMultiplicity_EGT30 = EGT_30_count;
+    eInfo.jetMultiplicity_EGT40 = EGT_40_count;
+
+}
+
+void EXOValidationTreeMaker::FillDijetInfo(edm::Handle<edm::View<flashgg::Jet> > &jets,Ptr<flashgg::DiPhotonCandidate> diphoton){
+
+    //Get lead and sublead jets
+    float leadPt(0), subleadPt(0);
+    int leadIndex(-1);
+    int subleadIndex(-1);
+    for (unsigned i=0;i<jets->size();i++){
+        Ptr<flashgg::Jet> jet = jets->ptrAt(i);
+
+        float dR_leadDP = deltaR(jet->eta(),jet->phi(),diphoton->leadingPhoton()->eta(),diphoton->leadingPhoton()->phi());
+        float dR_subLeadDP = deltaR(jet->eta(),jet->phi(),diphoton->subLeadingPhoton()->eta(),diphoton->subLeadingPhoton()->phi());
+        if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
+
+        if (jet->pt() > leadPt){
+            leadPt = jet->pt();
+            subleadIndex = leadIndex;
+            leadIndex = i;
+        }else if (jet->pt() > subleadPt){
+            subleadPt = jet->pt();
+            subleadIndex = i;
+        }
+    }
+
+    if (leadIndex != -1 && subleadIndex != -1){
+
+        Ptr<flashgg::Jet> leadJet = jets->ptrAt(leadIndex);
+        Ptr<flashgg::Jet> subleadJet = jets->ptrAt(subleadIndex);
+
+        eInfo.dijetLeadPt = leadJet->pt();
+        eInfo.dijetSubleadPt = subleadJet->pt();
+        eInfo.dijetLeadEta = leadJet->eta();
+        eInfo.dijetSubleadEta = subleadJet->eta();
+        eInfo.dijetMass = (leadJet->p4() + subleadJet->p4()).M();
+        eInfo.dijetDeltaEta = fabs(leadJet->eta() - subleadJet->eta());
+        eInfo.dijetZeppenfeld = fabs(diphoton->eta() - 0.5*(leadJet->eta()+subleadJet->eta()));
+        eInfo.dijetDeltaPhi_jj = fabs(deltaPhi(leadJet->phi() , subleadJet->phi()));
+        eInfo.dijetDeltaPhi_ggjj = fabs(deltaPhi(diphoton->phi() , (leadJet->p4()+subleadJet->p4()).Phi()));
+
+        std::cout << "Lead Jet Pt = " << eInfo.dijetLeadPt << std::endl;
+        std::cout << "Sublead Jet Pt = " << eInfo.dijetSubleadPt << std::endl;
+        std::cout << "Lead Jet Eta = " << eInfo.dijetLeadEta << std::endl;
+        std::cout << "Sublead Jet Eta = " << eInfo.dijetSubleadEta << std::endl;
+        std::cout << "Dijet Mass = " << eInfo.dijetMass << std::endl;
+        std::cout << "Dijet Delta Eta = " << eInfo.dijetDeltaEta << std::endl;
+        std::cout << "Dijet Zeppenfeld = " << eInfo.dijetZeppenfeld << std::endl;
+        std::cout << "Dijet Delta Phi jj = " << eInfo.dijetDeltaPhi_jj << std::endl;
+        std::cout << "Dijet Delta Phit ggjj = " << eInfo.dijetDeltaPhi_ggjj << std::endl;
+    }
+
+}
+
+void EXOValidationTreeMaker::FillDiphotonInfo(Ptr<flashgg::DiPhotonCandidate> diphoton){
+
+    eInfo.eventID = event_number;
+    eInfo.mgg = diphoton->mass();
+    eInfo.leadPt            = diphoton->leadingPhoton()->pt();
+    eInfo.subLeadPt          = diphoton->subLeadingPhoton()->pt();
+    eInfo.leadR9            = diphoton->leadingPhoton()->r9();
+    eInfo.subLeadR9          = diphoton->subLeadingPhoton()->r9();
+    eInfo.leadEtaSC         = diphoton->leadingPhoton()->superCluster()->eta();
+    eInfo.subLeadEtaSC      = diphoton->subLeadingPhoton()->superCluster()->eta();
+    eInfo.leadPhiSC         = diphoton->leadingPhoton()->superCluster()->phi();
+    eInfo.subLeadPhiSC      = diphoton->subLeadingPhoton()->superCluster()->phi();
+    eInfo.leadChargedHadronIso = diphoton->leadingPhoton()->egChargedHadronIso();
+    eInfo.leadPfPhoIso03 = diphoton->leadingPhoton()->egPhotonIso();
+    eInfo.leadFull5x5_sigmaIetaIeta = diphoton->leadingPhoton()->full5x5_sigmaIetaIeta();
+    eInfo.leadFull5x5_r9 = diphoton->leadingPhoton()->full5x5_r9();
+    eInfo.leadHadronicOverEm = diphoton->leadingPhoton()->hadTowOverEm();
+    eInfo.subLeadChargedHadronIso = diphoton->subLeadingPhoton()->egChargedHadronIso();
+    eInfo.subLeadPfPhoIso03 = diphoton->subLeadingPhoton()->egPhotonIso();
+    eInfo.subLeadFull5x5_sigmaIetaIeta = diphoton->subLeadingPhoton()->full5x5_sigmaIetaIeta();
+    eInfo.subLeadFull5x5_r9 = diphoton->subLeadingPhoton()->full5x5_r9();
+    eInfo.subLeadHadronicOverEm = diphoton->subLeadingPhoton()->hadTowOverEm();
+    eInfo.leadIsSaturated = (int)(diphoton->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
+                              && !diphoton->leadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
+    eInfo.subLeadIsSaturated = (int)(diphoton->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated) 
+                                 && !diphoton->subLeadingPhoton()->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
+    eInfo.leadPassElectronVeto = (int)(diphoton->leadingPhoton()->passElectronVeto());
+    eInfo.subLeadPassElectronVeto = (int)(diphoton->subLeadingPhoton()->passElectronVeto());
+    eInfo.nConv = diphoton->nConv();
+    eInfo.pullConv = diphoton->pullConv();
+
+}
 
 void
 EXOValidationTreeMaker::beginJob()
