@@ -199,8 +199,8 @@ struct diphotonInfo {
         dijetDeltaPhi_jj = -999;
         dijetDeltaPhi_ggjj = -999;
         
-        electronMultiplicity_EGT35 = 0;;
-        electronMultiplicity_EGT75 = 0;;
+        electronMultiplicity_EGT35 = 0;
+        electronMultiplicity_EGT75 = 0;
 
         dielecLeadPt = -999;
         dielecSubleadPt = -999;
@@ -353,7 +353,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
     }
     
-    if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
+    if (maxDiphoIndex>-1){
 
         //Category selection
         if (fabs(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta()) < boundaryEB){
@@ -428,7 +428,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }else{
             cout << "Diphoton fails selection" << endl;
         }
-
 
     }
     event_number++;
@@ -563,16 +562,6 @@ void EXOValidationTreeMaker::FillDijetInfo(edm::Handle<edm::View<flashgg::Jet> >
         eInfo.dijetZeppenfeld = fabs(diphoton->eta() - 0.5*(leadJet->eta()+subleadJet->eta()));
         eInfo.dijetDeltaPhi_jj = fabs(deltaPhi(leadJet->phi() , subleadJet->phi()));
         eInfo.dijetDeltaPhi_ggjj = fabs(deltaPhi(diphoton->phi() , (leadJet->p4()+subleadJet->p4()).Phi()));
-
-        std::cout << "Lead Jet Pt = " << eInfo.dijetLeadPt << std::endl;
-        std::cout << "Sublead Jet Pt = " << eInfo.dijetSubleadPt << std::endl;
-        std::cout << "Lead Jet Eta = " << eInfo.dijetLeadEta << std::endl;
-        std::cout << "Sublead Jet Eta = " << eInfo.dijetSubleadEta << std::endl;
-        std::cout << "Dijet Mass = " << eInfo.dijetMass << std::endl;
-        std::cout << "Dijet Delta Eta = " << eInfo.dijetDeltaEta << std::endl;
-        std::cout << "Dijet Zeppenfeld = " << eInfo.dijetZeppenfeld << std::endl;
-        std::cout << "Dijet Delta Phi jj = " << eInfo.dijetDeltaPhi_jj << std::endl;
-        std::cout << "Dijet Delta Phit ggjj = " << eInfo.dijetDeltaPhi_ggjj << std::endl;
     }
 
 }
@@ -642,7 +631,7 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "subLeadIsSaturated " , &eInfo.subLeadIsSaturated  , Form("%s/I","subLeadIsSaturated"));
     diphotonTree->Branch( "leadPassElectronVeto " , &eInfo.leadPassElectronVeto  , Form("%s/I","leadPassElectronVeto"));
     diphotonTree->Branch( "subLeadPassElectronVeto " , &eInfo.subLeadPassElectronVeto  , Form("%s/I","subLeadPassElectronVeto"));
-    diphotonTree->Branch( "nConv " , &eInfo.nConv  , Form("%s/F","nConv"));
+    diphotonTree->Branch( "nConv " , &eInfo.nConv  , Form("%s/I","nConv"));
     diphotonTree->Branch( "pullConv " , &eInfo.pullConv  , Form("%s/F","pullConv"));
 
     diphotonTree->Branch( "jetMultiplicity " , &eInfo.jetMultiplicity  , Form("%s/I","jetMultiplicity"));
