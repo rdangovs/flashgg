@@ -37,6 +37,8 @@
 
 #include "DataFormats/JetReco/interface/PileupJetIdentifier.h"
 
+#include "flashgg/DataFormats/interface/EXOTag.h"
+
 
 #include "TTree.h"
 #include "TMatrix.h"
@@ -424,6 +426,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
             cout << "Diphoton passes selection" << endl;
             eInfo.printExtraObjects();
+
+            EXOTag exoTag(diphoton,jets,electrons,event_number);
 
         }else{
             cout << "Diphoton fails selection" << endl;
