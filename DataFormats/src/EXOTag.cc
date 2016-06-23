@@ -44,8 +44,9 @@ void EXOTag::setDijet(){
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
 
         if (jet->pt() > leadPt){
-            leadPt = jet->pt();
+            subleadPt = leadPt;
             subleadIndex = leadIndex;
+            leadPt = jet->pt();
             leadIndex = i;
         }else if (jet->pt() > subleadPt){
             subleadPt = jet->pt();
@@ -76,8 +77,9 @@ void EXOTag::setDielectron(){
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
 
         if (electron->pt() > leadPt){
-            leadPt = electron->pt();
+            subleadPt = leadPt;
             subleadIndex = leadIndex;
+            leadPt = electron->pt();
             leadIndex = i;
         }else if (electron->pt() > subleadPt){
             subleadPt = electron->pt();
