@@ -31,6 +31,16 @@ namespace flashgg {
         const float getDiphotonSubleadEta(); 
         const float getDiphotonMass();
 
+        const float getDiphotonLeadR9();
+        const float getDiphotonSubleadR9();
+        const float getDiphotonLeadEtaSC();
+        const float getDiphotonSubleadEtaSC();
+        const float getDiphotonLeadPhiSC();
+        const float getDiphotonSubleadPhiSC();
+        const unsigned getDiphotonCategory();
+
+
+
     private:
         unsigned eventNumber_;
 

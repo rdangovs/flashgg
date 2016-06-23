@@ -137,6 +137,60 @@ const float EXOTag::getDiphotonSubleadEta(){ return hasDiphoton_ ? diphoton_->su
 
 const float EXOTag::getDiphotonMass(){ return hasDiphoton_ ? diphoton_->mass() : -999.; }
 
+const float EXOTag::getDiphotonLeadR9(){ return hasDiphoton_ ? diphoton->leadingPhoton()->r9() : -999.; }
+
+const float EXOTag::getDiphotonSubleadR9(){ return hasDiphoton_ ? diphoton->subleadingPhoton()->r9() : -999.; }
+
+const float EXOTag::getDiphotonLeadEtaSC(){ return hasDiphoton_ ? diphoton->leadingPhoton()->superCluster()->eta() : -999.; }
+
+const float EXOTag::getDiphotonSubleadEtaSC(){ return hasDiphoton_ ? diphoton->subleadingPhoton()->superCluster()->eta() : -999.; }
+
+const float EXOTag::getDiphotonLeadPhiSC(){ return hasDiphoton_ ? diphoton->leadingPhoton()->superCluster()->phi() : -999.; }
+
+const float EXOTag::getDiphotonSubleadPhiSC(){ return hasDiphoton_ ? diphoton->subleadingPhoton()->superCluster()->phi() : -999.; }
+
+const unsigned EXOTag::getDiphotonCategory(){
+
+    if (!hasDiphoton_){
+        return -999.;
+    }else{
+        
+        float boundaryEB(1.4442);
+        float boundaryEELo(1.566), boundaryEEHi(2.5);
+        int leadCat(-1), subLeadCat(-1);
+
+        if (fabs(diphoton_->leadingPhoton()->eta()) < boundaryEB){
+            leadCat = 0;
+        }else if (fabs(diphoton_->leadingPhoton()->eta()) > boundaryEELo
+                    && fabs(diphoton_->subLeadingPhoton()->eta()) < boundaryEEHi){
+            leadCat = 1;
+        }
+        if (fabs(diphoton_->subLeadingPhoton()->eta()) < boundaryEB){
+            subLeadCat = 0;
+        }else if (fabs(diphoton_->subLeadingPhoton()->eta()) > boundaryEELo
+                    && fabs(diphoton_->subLeadingPhoton()->eta()) < boundaryEEHi){
+            subLeadCat = 1;
+        }
+        if (leadCat == 0 && subLeadCat == 0){
+            return 0;
+        }else if ((leadCat == 0 && subLeadCat == 1) || (leadCat == 1 && subLeadCat == 0)){
+            return 1;
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // Local Variables:
 // mode:c++
 // indent-tabs-mode:nil
