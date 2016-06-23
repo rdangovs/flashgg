@@ -14,17 +14,20 @@ EXOTag::EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<fla
     eventNumber_=eventNumber;
 
     diphoton_=diphoton;
-
-    hasDiphoton_ = true;   //Placeholder
+    hasDiphoton_ = !diphoton->isNull();
 
     jets_=jets;
-    electrons_=electrons;
-
     setHasJets();
-    setHasElectrons();
-
     setDijet();
+
+    electrons_=electrons;
+    setHasElectrons();
     setDielectron();
+
+    if (!hasDiphoton_){
+        hasDijet_ = false;
+        hasElectrons_ = false;
+    }
 
 }
 

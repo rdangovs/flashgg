@@ -1,104 +1,118 @@
-#!/usr/bin/env cmsRun
+# ================================================
+#   MicroAOD and Jet Tree Producer
+#   Y. Haddad 01/2015
+# ================================================
 
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
-from FWCore.ParameterSet.VarParsing import VarParsing
-
-from flashgg.MetaData.samples_utils import SamplesManager
-
-## CMD LINE OPTIONS ##
-options = VarParsing('analysis')
-print options
-
-# maxEvents is the max number of events processed of each file, not globally
-options.maxEvents = -1
-options.inputFiles = "file:myTagOutputFile.root" 
-options.outputFile = "VBFTagsDump.root" 
-options.parseArguments()
-
-## I/O SETUP ##
-process = cms.Process("VBFTagsDumper")
-
+from flashgg.MicroAOD.flashggJets_cfi import flashggBTag, maxJetCollections
+process = cms.Process("FLASHggEXOValidation")
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1 )
-process.source = cms.Source ("PoolSource",
-                             fileNames = cms.untracked.vstring(options.inputFiles))
+process.load("flashgg.Systematics.flashggDiPhotonSystematics_cfi")
+process.load("flashgg.Systematics.flashggMuonSystematics_cfi")
+process.load("flashgg.Systematics.flashggElectronSystematics_cfi")
+process.load("flashgg.Systematics.flashggJetSystematics_cfi")
+process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
-if options.maxEvents > 0:
-    process.source.eventsToProcess = cms.untracked.VEventRange('1:1-1:'+str(options.maxEvents))
+# +++++ the number of processed events
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1000 )
 
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string(options.outputFile))
+# +++++ the source file
+process.source = cms.Source("PoolSource",
+                            fileNames=cms.untracked.vstring(
+                                                        #"/store/group/phys_higgs/cmshgg/sethzenz/flashgg/RunIIFall15DR76-1_3_0-25ns/1_3_0/DoubleEG/RunIIFall15DR76-1_3_0-25ns-1_3_0-v0-Run2015D-16Dec2015-v2/160116_222234/0000/myMicroAODOutputFile_720.root"
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_393.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_392.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_391.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_390.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_389.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_388.root",
+														"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_386.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_385.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_384.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_383.root"
+														)) 
 
-from flashgg.Taggers.tagsDumpers_cfi import createTagDumper
+#process.MessageLogger.cerr.threshold = 'ERROR'
+
+process.TFileService = cms.Service("TFileService",fileName  = cms.string("exoValidationTrees_test.root"))
+
+# process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
+#                                                        GenParticleTag           = cms.untracked.InputTag('prunedGenParticles'),
+#                                                        JetTagDz                 = cms.InputTag("flashggJets"),
+#                                                        StringTag		= cms.string("PF"),
+#                                                    )
+#
+
+#JetCollectionVInputTagPFCHS = cms.VInputTag()
+#JetCollectionVInputTagPUPPI = cms.VInputTag()
+#for i in range(0,5):
+#    JetCollectionVInputTagPFCHS.append(cms.InputTag('flashggPFCHSJets' + str(i)))
+    #JetCollectionVInputTagPUPPI.append(cms.InputTag('flashggPUPPIJets' + str(i)))
+
+process.flashggUnpackedJets = cms.EDProducer("FlashggVectorVectorJetUnpacker",
+                                             JetsTag = cms.InputTag("flashggFinalJets"),
+                                             NCollections = cms.uint32(8))
+	 
+hltPaths = ["HLT_DoublePhoton85*","HLT_Photon250_NoHE*","HLT_DoublePhoton60*"]
+process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
+process.hltHighLevel.HLTPaths = hltPaths
+
+from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
+process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
+                                                            inputTagJets= UnpackedJetCollectionVInputTag,
+                                                            ElectronTag= cms.InputTag("flashggSelectedElectrons"),
+                                                            DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
+                                                            rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
+                                                            )
+
+
+from flashgg.Taggers.tagDumpers_cfi import createTagDumper
 import flashgg.Taggers.dumperConfigTools as cfgTools
 
-process.vbfTagDumper = createTagDumper("VBFTag")
-process.vbfTagDumper.dumpTrees = True
-process.vbfTagDumper.dumpHistos = True
+process.exoTagDumper = createTagDumper("EXOTag")
+process.exoTagDumper.dumpTrees = True
 
-dipho_variables=["dipho_sumpt      := diPhoton.sumPt",
-                 "dipho_cosphi     := abs(cos(diPhoton.leadingPhoton.phi - diPhoton.subLeadingPhoton.phi))",
-                 "mass             := diPhoton.mass",
-                 "leadPt           := diPhoton.leadingPhoton.pt",
-                 "leadEt           := diPhoton.leadingPhoton.et",
-                 "leadEta          := diPhoton.leadingPhoton.eta",
-                 "leadPhi          := diPhoton.leadingPhoton.phi",
-                 "lead_sieie       := diPhoton.leadingPhoton.sigmaIetaIeta",
-                 "lead_hoe         := diPhoton.leadingPhoton.hadronicOverEm",
-                 "lead_sigmaEoE    := diPhoton.leadingPhoton.sigEOverE",
-                 "lead_ptoM        := diPhoton.leadingPhoton.pt/diPhoton.mass",
-                 "leadR9           := diPhoton.leadingPhoton.r9",
-                 "subleadPt        := diPhoton.subLeadingPhoton.pt",
-                 "subleadEt        := diPhoton.subLeadingPhoton.et",
-                 "subleadEta       := diPhoton.subLeadingPhoton.eta",
-                 "subleadPhi       := diPhoton.subLeadingPhoton.phi",
-                 "sublead_sieie    := diPhoton.subLeadingPhoton.sigmaIetaIeta",
-                 "sublead_hoe      := diPhoton.subLeadingPhoton.hadronicOverEm",
-                 "sublead_sigmaEoE := diPhoton.subLeadingPhoton.sigEOverE",
-                 "sublead_ptoM     := diPhoton.subLeadingPhoton.pt/diPhoton.mass",
-                 "subleadR9        := diPhoton.subLeadingPhoton.r9",
-                 "leadIDMVA        := diPhoton.leadingView.phoIdMvaWrtChosenVtx",
-                 "subleadIDMVA     := diPhoton.subLeadingView.phoIdMvaWrtChosenVtx",]
+diphotonVariables = ["eventNumber := EXOTag().getEventNumber()",
+                     "diphotonMass := EXOTag().getDiphotonMass()",
+                     "diphotonLeadPt := EXOTag().getDiphotonLeadPt()",
+                     "diphotonSubleadPt := EXOTag().getDiphotonSubleadPt()",
+                     "diphotonLeadEta := EXOTag().getDiphotonLeadEta()",
+                     "diphotonSubleadEta := EXOTag().getDiphotonSubleadEta()"]
 
-cfgTools.addCategories(process.vbfTagDumper,
-                       ## categories definition                                                                                                                                                                                  
-                       [("all","1",0)
-                    ],
-                       ## variables to be dumped in trees/datasets. Same variables for all categories                                                                                                                            
-                       variables=dipho_variables+
-                       ["dRphoLeadJ    := min(deltaR(leadingJet.eta, leadingJet.phi, diPhoton.leadingPhoton.eta, diPhoton.leadingPhoton.phi), deltaR(leadingJet.eta, leadingJet.phi, diPhoton.subLeadingPhoton.eta, diPhoton.subLeadingPhoton.phi))",
-                        "dRphoSubleadJ := min(deltaR(subLeadingJet.eta, subLeadingJet.phi, diPhoton.leadingPhoton.eta, diPhoton.leadingPhoton.phi), deltaR(subLeadingJet.eta, subLeadingJet.phi, diPhoton.subLeadingPhoton.eta, diPhoton.subLeadingPhoton.phi))",
-                        "leadJPt       := leadingJet.pt",
-                        "leadJEta      := leadingJet.eta",
-                        "subleadJPt    := subLeadingJet.pt",
-                        "subleadJEta   := leadingJet.eta",
-                        "Mjj           := sqrt((leadingJet.energy+subLeadingJet.energy)^2-(leadingJet.px+subLeadingJet.px)^2-(leadingJet.py+subLeadingJet.py)^2-(leadingJet.pz+subLeadingJet.pz)^2)",
-                        "dijet_dEta    := abs(leadingJet.eta - subLeadingJet.eta)",
-                        "dijet_dPhi    := deltaPhi(leadingJet.phi, subLeadingJet.phi)",
-                        "dijet_Zep     := VBFMVA.dijet_Zep",
-                        "dijet_MVA     := VBFMVA.VBFMVAValue",
-                        "vbfcat        := categoryNumber",
-                        "genZ           :=tagTruth().genPV().z",
-                        "vtxZ           :=diPhoton().vtx().z",
-                        "dZ            :=abs(tagTruth().genPV().z-diPhoton().vtx().z)",
-                        "leadQuarkPt                  := tagTruth().pt_Q1",
-                        "matchingGenJetToLeadPt    := tagTruth().pt_genPartMatchingToJ1"
+cfgTools.addCategories( process.exoTagDumper,
+                        [
+                            ("EXODiphoton","EXOTag().getDiphotonMass() > 0") #Placeholder
                         ],
-                       histograms=["CMS_hgg_mass>>mass(160,100,180)",
-                                   "subleadPt:leadPt>>ptLeadvsSub(180,20,200:180,20,200)",
-                                   "diphoMVA>>diphoMVA(50,0,1)",
-                                   "maxEta>>maxEta[0.,0.1,0.2,0.3,0.4,0.6,0.8,1.0,1.2,1.4442,1.566,1.7,1.8,2.,2.2,2.3,2.5]",
-                                   "subleadJetPt:leadJetPt>>JetptLeadvsSub(8,20,100:8,20,100)",
-                                   "VBFMVA>>VBFMVA(50,0,1)"
-                                   ]
-                       )
-
-
-
-process.p1 = cms.Path(
-    process.vbfTagDumper
+                        variables = diphotonVariables
+                        histograms = [];
     )
 
-print process.p1
+process.vbfTagDumper.nameTemplate = "$PROCESS_$SQRTS_$CLASSNAME_$SUBCAT_$LABEL"
+
+process.options = cms.untracked.PSet( allowUnscheduled = cms.untracked.bool(True) )
+
+process.p = cms.Path( 
+    process.flashggUnpackedJets+
+    process.hltHighLevel*
+    process.flashggDiPhotonSystematics*
+    process.flashggEXOValidationTreeMaker 
+    )
+process.e = cms.EndPath()
+
+process.load('flashgg.Systematics.escales.escale76X_16DecRereco_2015')
+#useEGMTools(process)
+
+ # customization for job splitting, lumi weighting, etc.
+from diphotons.MetaData.JobConfig import customize
+customize.setDefault("maxEvents",3000)
+customize.setDefault("processId",'Data')
+customize(process)
+from flashgg.Systematics.SystematicsCustomize import *
+#if customize.processId == "Data":	
+customizePhotonSystematicsForData(process)
+#customizeSystematicsForSignal(process)
+
+
