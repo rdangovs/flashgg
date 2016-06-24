@@ -448,6 +448,7 @@ void EXOValidationTreeMaker::FillDielectronInfo(Handle<View<flashgg::Electron>> 
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
 
         if (electron->pt() > leadPt){
+            subLeadPt = leadPt; 
             leadPt = electron->pt();
             subleadIndex = leadIndex;
             leadIndex = i;
@@ -540,6 +541,7 @@ void EXOValidationTreeMaker::FillDijetInfo(edm::Handle<edm::View<flashgg::Jet> >
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
 
         if (jet->pt() > leadPt){
+            subLeadPt = leadPt; 
             leadPt = jet->pt();
             subleadIndex = leadIndex;
             leadIndex = i;
