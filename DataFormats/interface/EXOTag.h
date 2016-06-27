@@ -25,11 +25,15 @@ namespace flashgg {
                 edm::Handle<edm::View<flashgg::Electron>> &electrons, unsigned eventNumber);
 
         const unsigned getEventNumber();
+
+        const float getDiphotonMass();
+        const int   getDiphotonNConv();
+        const float getDiphotonPullConv();
+
         const float getDiphotonLeadPt(); 
         const float getDiphotonSubleadPt(); 
         const float getDiphotonLeadEta(); 
         const float getDiphotonSubleadEta(); 
-        const float getDiphotonMass();
 
         const float getDiphotonLeadR9();
         const float getDiphotonSubleadR9();
@@ -37,8 +41,39 @@ namespace flashgg {
         const float getDiphotonSubleadEtaSC();
         const float getDiphotonLeadPhiSC();
         const float getDiphotonSubleadPhiSC();
-        const unsigned getDiphotonCategory();
+        const int   getDiphotonCategory();
 
+        const float getDiphotonLeadCHI();
+        const float getDiphotonSubleadCHI();
+        const float getDiphotonLeadEGPhoIso();
+        const float getDiphotonSubleadEGPhoIso();
+        const float getDiphotonLeadF5x5SigmaIetaIeta();
+        const float getDiphotonSubleadF5x5SigmaIetaIeta();
+        const float getDiphotonLeadFull5x5R9();
+        const float getDiphotonSubleadFull5x5R9();
+        const float getDiphotonLeadHadronicOverEM();
+        const float getDiphotonSubleadHadronicOverEM();
+
+        const int getDiphotonLeadIsSaturated();
+        const int getDiphotonSubleadIsSaturated();
+        const int getDiphotonLeadPassElectronVeto();
+        const int getDiphotonSubleadPassElectronVeto();
+
+        //Jet variables
+        const int getJetMultiplicities_All();
+        const int getJetMultiplicities_EGT20();
+        const int getJetMultiplicities_EGT30();
+        const int getJetMultiplicities_EGT40();
+
+        const float getDijetLeadPt(); 
+        const float getDijetSubleadPt(); 
+        const float getDijetLeadEta(); 
+        const float getDijetSubleadEta(); 
+        const float getDijetMass();
+        const float getDijetDeltaEta();
+        const float getDijetZeppenfeld();
+        const float getDijetDeltaPhi_jj();
+        const float getDijetDeltaPhi_ggjj();
 
 
     private:
@@ -65,6 +100,8 @@ namespace flashgg {
         void setHasJets();
         void setHasElectrons();
 
+        const int countJetsOverPT(float ptCut);
+        const int countElectronsOverPT(float ptCut);
     };
 
 }
