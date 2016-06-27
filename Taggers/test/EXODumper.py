@@ -27,12 +27,81 @@ process.exoTagDumper.dumpTrees = True
 process.exoTagDumper.dumpHistos = False
 process.exoTagDumper.dumpWorkspace = False
 
-dipho_vars = [
-        "eventID := exoTag
+diphoton_vars = [
 
+        "eventID := getEventNumber()",
+        "diphoton_Mass := getDiphotonMass()",
+        "diphoton_NConv := getDiphotonNConv()",
+        "diphoton_PullCov := getDiphotonPullConv()",
 
+        "diphoton_LeadPt := getDiphotonLeadPt()",
+        "diphoton_SubleadPt := getDiphotonSubleadPt()",
+        "diphoton_LeadEta := getDiphotonLeadEta()",
+        "diphoton_SubleadEta := getDiphotonSubleadEta()",
 
+        "diphoton_LeadR9 := getDiphotonLeadR9()",
+        "diphoton_SubleadR9 := getDiphotonSubleadR9()",
+        "diphoton_LeadEtaSC := getDiphotonLeadEtaSC()",
+        "diphoton_SubleadEtaSC := getDiphotonSubleadEtaSC()",
+        "diphoton_LeadPhiSC := getDiphotonLeadPhiSC()",
+        "diphoton_SubleadPhiSC := getDiphotonSubleadPhiSC()",
+        "diphoton_Category := getDiphotonCategory()",
 
+        "diphoton_LeadCHI := getDiphotonLeadCHI()",
+        "diphoton_SubleadCHI := getDiphotonSubleadCHI()",
+        "diphoton_LeadEGPhoIso := getDiphotonLeadEGPhoIso()",
+        "diphoton_SubleadEGPhoIso := getDiphotonSubleadEGPhoIso()",
+        "diphoton_LeadF5x5SigmaIetaIeta := getDiphotonLeadF5x5SigmaIetaIeta()",
+        "diphoton_SubleadF5x5SigmaIetaIeta := getDiphotonSubleadF5x5SigmaIetaIeta()",
+        "diphoton_LeadFull5x5R9 := getDiphotonLeadFull5x5R9()",
+        "diphoton_SubleadFull5x5R9 := getDiphotonSubleadFull5x5R9()",
+        "diphoton_LeadHadronicOverEM := getDiphotonLeadHadronicOverEM()",
+        "diphoton_SubleadHadronicOverEM := getDiphotonSubleadHadronicOverEM()",
 
+        "diphoton_LeadIsSaturated := getDiphotonLeadIsSaturated()",
+        "diphoton_SubleadIsSaturated := getDiphotonSubleadIsSaturated()",
+        "diphoton_LeadPassElectronVeto := getDiphotonLeadPassElectronVeto()",
+        "diphoton_SubleadPassElectronVeto := getDiphotonSubleadPassElectronVeto()",
+        ]
+
+jet_vars = [
+
+        "jets_multiplicites_All := getJetMultiplicities_All()",
+        "jets_multiplicites_EGT20 := getJetMultiplicities_EGT20()",
+        "jets_multiplicites_EGT30 := getJetMultiplicities_EGT30()",
+        "jets_multiplicites_EGT40 := getJetMultiplicities_EGT40()",
+
+        "dijet_LeadPt := getDijetLeadPt()",
+        "dijet_SubleadPt := getDijetSubleadPt()",
+        "dijet_LeadEta := getDijetLeadEta()",
+        "dijet_SubleadEta := getDijetSubleadEta()",
+        "dijet_Mass := getDijetMass()",
+        "dijet_DeltaEta := getDijetDeltaEta()",
+        "dijet_Zeppenfeld := getDijetZeppenfeld()",
+        "dijet_DeltaPhi_jj := getDijetDeltaPhi_jj()",
+        "dijet_DeltaPhigg_jj := getDijetDeltaPhigg_jj()",
+
+        ]
+        
+all_var = diphoton_vars + jet_vars
+
+cfgTools.addCategories(process.exoTagDumper,
+                        [("test","getDiphotonMass()>0",0)],
+                        variables = all_var,
+                        histograms = []
+                        )
+
+process.exoTagDumper.nameTemplate = "$PROCESS_$SQRTS_$CLASSNAME_$SUBCAT_$LABEL"
+
+from flashgg.MetaData.JobConfig import customize
+customize.setDefault("maxEvents",-1)
+customize.setDefault("targetLumi",1.e+4)
+customize(process)
+
+process.p1 = cms.Path(
+                    process.exoTagDumper
+                    )
+
+print process.p1
 
 
