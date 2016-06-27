@@ -102,6 +102,7 @@ namespace flashgg {
             edm::Handle<edm::View<flashgg::Jet>> jets = Jets[jetCollectionIndex];
 
             EXOTag exoTag(diphoton,jets,electrons,rhoFixedGrd,event_number);
+            tags->push_back(exoTag);
 
         }
 
