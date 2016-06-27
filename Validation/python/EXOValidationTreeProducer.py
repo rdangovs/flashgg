@@ -16,7 +16,7 @@ process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 # +++++ the number of processed events
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 500 )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1 )
 
 # +++++ the source file
 process.source = cms.Source("PoolSource",
