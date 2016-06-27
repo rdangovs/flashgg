@@ -83,8 +83,6 @@ namespace flashgg {
         iEvent.getByToken( rhoToken_, rhoHandle );
         const double rhoFixedGrd = *( rhoHandle.product() );
 
-        std::cout << rhoFixedGrd << std::endl;
-
         //JETS
         JetCollectionVector Jets(inputTagJets_.size());
         for (size_t i=0;i<inputTagJets_.size();i++){
@@ -103,7 +101,7 @@ namespace flashgg {
             unsigned jetCollectionIndex = diphoton->jetCollectionIndex();
             edm::Handle<edm::View<flashgg::Jet>> jets = Jets[jetCollectionIndex];
 
-            EXOTag exoTag(diphoton,jets,electrons,event_number);
+            EXOTag exoTag(diphoton,jets,electrons,rhoFixedGrd,event_number);
 
         }
 

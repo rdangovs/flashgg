@@ -22,9 +22,11 @@ namespace flashgg {
         EXOTag *clone() const { return ( new EXOTag( *this ) ); }
 
         EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<flashgg::Jet>> &jets, 
-                edm::Handle<edm::View<flashgg::Electron>> &electrons, unsigned eventNumber);
+                edm::Handle<edm::View<flashgg::Electron>> &electrons, double rhoFixedGrid, unsigned eventNumber);
 
         const unsigned getEventNumber();
+
+        const int   getDiphotonCutsPass();
 
         const float getDiphotonMass();
         const int   getDiphotonNConv();
@@ -75,6 +77,19 @@ namespace flashgg {
         const float getDijetDeltaPhi_jj();
         const float getDijetDeltaPhi_ggjj();
 
+        //Electron variables
+        const int getElectronMultiplicity_EGT35();
+        const int getElectronMultiplicity_EGT75();
+
+        const float getDielectronLeadPt(); 
+        const float getDielectronSubleadPt(); 
+        const float getDielectronLeadEta(); 
+        const float getDielectronSubleadEta(); 
+        const float getDielectronMass();
+        const float getDielectronDeltaEta();
+        const float getDielectronZeppenfeld();
+        const float getDielectronDeltaPhi_ee();
+        const float getDielectronDeltaPhi_ggee();
 
     private:
         unsigned eventNumber_;
@@ -90,6 +105,8 @@ namespace flashgg {
         bool hasJets_;
         bool hasElectrons_;
 
+        double rhoFixedGrid_;
+
         Dijet dijet_;
         Dielectron dielectron_;
         bool hasDijet_;
@@ -102,6 +119,9 @@ namespace flashgg {
 
         const int countJetsOverPT(float ptCut);
         const int countElectronsOverPT(float ptCut);
+
+        bool passPhotonIDCuts(const flashgg::Photon* pho, const double rho);
+        float correctIsoGam(const flashgg::Photon* pho, const double rho);
     };
 
 }

@@ -34,6 +34,8 @@ diphoton_vars = [
         "diphoton_NConv := getDiphotonNConv()",
         "diphoton_PullCov := getDiphotonPullConv()",
 
+        "diphoton_CutsPass := getDiphotonCutsPass()",
+
         "diphoton_LeadPt := getDiphotonLeadPt()",
         "diphoton_SubleadPt := getDiphotonSubleadPt()",
         "diphoton_LeadEta := getDiphotonLeadEta()",
