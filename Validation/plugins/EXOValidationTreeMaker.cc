@@ -120,7 +120,9 @@ struct diphotonInfo {
     int   subLeadPassElectronVeto;
     float nConv;
     float pullConv;
-
+   
+    //cosThetaStar
+    float cosThetaStar; 
    
     //Extra objects
     int   jetMultiplicity;
@@ -138,7 +140,7 @@ struct diphotonInfo {
     float dijetZeppenfeld;
     float dijetDeltaPhi_jj;
     float dijetDeltaPhi_ggjj;
-
+    
     //Electrons
     float electronMultiplicity_EGT35;
     float electronMultiplicity_EGT75;
@@ -183,7 +185,9 @@ struct diphotonInfo {
         subLeadPassElectronVeto = -999;
         nConv = -999;
         pullConv = -999;
-
+        
+        cosThetaStar = -999; 
+        
         jetMultiplicity = 0;
         jetMultiplicity_EGT20 = 0;
         jetMultiplicity_EGT30 = 0;
@@ -317,6 +321,8 @@ EXOValidationTreeMaker::~EXOValidationTreeMaker()
 void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
+    std::cout << "Hello! I love you, let me see you again!" << std::endl; 
+
     eInfo.init();
 
     //Set cat boundaries
@@ -392,11 +398,17 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }else if (eInfo.category == 1){
             passesMassCut = diPhotons->ptrAt(maxDiphoIndex)->mass() > mggCutEBEE;
         }
+        
+        //debug 
+        std::cout << passesPtCut << " " << passesLeadEtaSCCut << " " << passesSubLeadEtaSCCut << " " << passesOneBarrelEtaSCCut << " " << passesMassCut << std::endl;   
 
         if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
 
             Ptr<flashgg::DiPhotonCandidate> diphoton = diPhotons->ptrAt(maxDiphoIndex);
             FillDiphotonInfo(diphoton);
+            
+            std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
+            std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
 
             //EXTRA OBJECTS
             
@@ -609,9 +621,11 @@ void EXOValidationTreeMaker::FillDiphotonInfo(Ptr<flashgg::DiPhotonCandidate> di
     eInfo.subLeadPassElectronVeto = (int)(diphoton->subLeadingPhoton()->passElectronVeto());
     eInfo.nConv = diphoton->nConv();
     eInfo.pullConv = diphoton->pullConv();
+    
+    eInfo.cosThetaStar = (float) (2 * (diphoton->subLeadingPhoton()->energy() * diphoton->leadingPhoton()->pz() - diphoton->leadingPhoton()->energy() * diphoton->subLeadingPhoton()->pz()) / (diphoton->mass() * TMath::Sqrt (diphoton->mass() * diphoton->mass() + diphoton->leadingPhoton()->pt() * diphoton->leadingPhoton()->pt()))); 
 
 }
-
+ 
 void
 EXOValidationTreeMaker::beginJob()
 {
@@ -646,6 +660,8 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "subLeadPassElectronVeto " , &eInfo.subLeadPassElectronVeto  , Form("%s/I","subLeadPassElectronVeto"));
     diphotonTree->Branch( "nConv " , &eInfo.nConv  , Form("%s/F","nConv"));
     diphotonTree->Branch( "pullConv " , &eInfo.pullConv  , Form("%s/F","pullConv"));
+    
+    diphotonTree->Branch( "cosThetaStar" , &eInfo.cosThetaStar          , Form("%s/F","cosThetaStar"));
 
     diphotonTree->Branch( "jetMultiplicity " , &eInfo.jetMultiplicity  , Form("%s/I","jetMultiplicity"));
     diphotonTree->Branch( "jetMultiplicity_EGT20 " , &eInfo.jetMultiplicity_EGT20  , Form("%s/I","jetMultiplicity_EGT20"));

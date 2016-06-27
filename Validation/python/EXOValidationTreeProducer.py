@@ -16,7 +16,7 @@ process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 # +++++ the number of processed events
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1000 )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 500 )
 
 # +++++ the source file
 process.source = cms.Source("PoolSource",
@@ -28,12 +28,14 @@ process.source = cms.Source("PoolSource",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_390.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_389.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_388.root",
-														"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root",
+														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_386.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_385.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_384.root",
 														#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_383.root"
-														)) 
+
+"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-001_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/160527_170715/0000/diphotonsMicroAOD_1.root"														
+)) 
 
 #process.MessageLogger.cerr.threshold = 'ERROR'
 
@@ -61,6 +63,7 @@ process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 process.hltHighLevel.HLTPaths = hltPaths
 
 from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
+
 process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
                                                             inputTagJets= UnpackedJetCollectionVInputTag,
                                                             ElectronTag= cms.InputTag("flashggSelectedElectrons"),
@@ -82,14 +85,16 @@ process.e = cms.EndPath()
 process.load('flashgg.Systematics.escales.escale76X_16DecRereco_2015')
 #useEGMTools(process)
 
+"""
  # customization for job splitting, lumi weighting, etc.
-#from diphotons.MetaData.JobConfig import customize
-#customize.setDefault("maxEvents",3000)
-#customize.setDefault("processId",'Data')
-#customize(process)
-#from flashgg.Systematics.SystematicsCustomize import *
-#if customize.processId == "Data":	
-#customizePhotonSystematicsForData(process)
-#customizeSystematicsForSignal(process)
+from diphotons.MetaData.JobConfig import customize
+customize.setDefault("maxEvents",-1)
+customize.setDefault("processId",'Data')
 
+customize(process)
+from flashgg.Systematics.SystematicsCustomize import *
+#if customize.processId == "Data":	
+customizePhotonSystematicsForData(process)
+#customizeSystematicsForSignal(process)
+"""
 
