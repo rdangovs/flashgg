@@ -83,13 +83,13 @@ process.load('flashgg.Systematics.escales.escale76X_16DecRereco_2015')
 #useEGMTools(process)
 
  # customization for job splitting, lumi weighting, etc.
-from diphotons.MetaData.JobConfig import customize
-customize.setDefault("maxEvents",3000)
-customize.setDefault("processId",'Data')
-customize(process)
-from flashgg.Systematics.SystematicsCustomize import *
+#from diphotons.MetaData.JobConfig import customize
+#customize.setDefault("maxEvents",3000)
+#customize.setDefault("processId",'Data')
+#customize(process)
+#from flashgg.Systematics.SystematicsCustomize import *
 #if customize.processId == "Data":	
-customizePhotonSystematicsForData(process)
+#customizePhotonSystematicsForData(process)
 #customizeSystematicsForSignal(process)
 
 
