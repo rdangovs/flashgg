@@ -18,6 +18,15 @@ process.TFileService = cms.Service( "TFileService",
                                     fileName = cms.string("EXOTagsDump.root"),
                                     closeFileFast = cms.untracked.bool(True) )
 
+from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
+process.flashggEXOTagProducer = cms.EDProducer('FlashggEXOTagProducer',
+                                                inputTagJets= UnpackedJetCollectionVInputTag,
+                                                ElectronTag= cms.InputTag("flashggSelectedElectrons"),
+                                                DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
+                                                rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
+                                                )
+
+
 from flashgg.Taggers.flashggTagOutputCommands_cff import tagDefaultOutputCommand
 import flashgg.Taggers.dumperConfigTools as cfgTools
 from  flashgg.Taggers.tagsDumpers_cfi import createTagDumper
@@ -63,7 +72,8 @@ diphoton_vars = [
         "diphoton_LeadIsSaturated := getDiphotonLeadIsSaturated()",
         "diphoton_SubleadIsSaturated := getDiphotonSubleadIsSaturated()",
         "diphoton_LeadPassElectronVeto := getDiphotonLeadPassElectronVeto()",
-        "diphoton_SubleadPassElectronVeto := getDiphotonSubleadPassElectronVeto()",
+        "diphoton_SubleadPassElectronVeto := getDiphotonSubleadPassElectronVeto()"
+
         ]
 
 jet_vars = [
@@ -81,7 +91,7 @@ jet_vars = [
         "dijet_DeltaEta := getDijetDeltaEta()",
         "dijet_Zeppenfeld := getDijetZeppenfeld()",
         "dijet_DeltaPhi_jj := getDijetDeltaPhi_jj()",
-        "dijet_DeltaPhigg_jj := getDijetDeltaPhigg_jj()",
+        "dijet_DeltaPhigg_jj := getDijetDeltaPhigg_jj()"
 
         ]
         
@@ -101,6 +111,7 @@ customize.setDefault("targetLumi",1.e+4)
 customize(process)
 
 process.p1 = cms.Path(
+                    process.flashggEXOTagProducer+
                     process.exoTagDumper
                     )
 
