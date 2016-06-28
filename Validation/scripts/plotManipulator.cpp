@@ -76,7 +76,7 @@ void plotManipulator () {
 		makePlot (tree, variables[i]); 
 	
 	//std::cout << histograms.size () << std::endl;
-	//TH1F hans = (*histograms[0]) + (*histograms[1]); 
+	TH1F hans = (*histograms[0]) + (*histograms[1]); 
 	/*
 	string input; 
 	while (true) { 
@@ -182,7 +182,7 @@ vector<Plot> getPlotDetails(){
     info.var = "subLeadPt";
     info.numBins = 34;
     info.minX = 75;
-    info.maxX = 700;
+    info.maxX = 1200;
     info.category = 0;
     info.title = "Subleading Photon p_{T}";
     info.xLabel = "p_T (GeV)";
