@@ -70,11 +70,6 @@ namespace flashgg {
     void EXOTagProducer::produce( Event &iEvent, const EventSetup & )
     {
 
-        //Set cat boundaries
-        //float boundaryEB(1.4442);
-        //float boundaryEELo(1.566), boundaryEEHi(2.5);
-        //int leadCat(-1), subLeadCat(-1);
-
         //DIPHOTON
         Handle<View<flashgg::DiPhotonCandidate> > diphotons;
         iEvent.getByToken( diPhotonToken_, diphotons );
@@ -105,11 +100,9 @@ namespace flashgg {
             tags->push_back(exoTag);
 
         }
-
-        event_number++;
-
         iEvent.put( tags );
 
+        event_number++;
     }
 }
 

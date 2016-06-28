@@ -111,7 +111,7 @@ customize.setDefault("targetLumi",1.e+4)
 customize(process)
 
 process.p1 = cms.Path(
-                    process.flashggEXOTagProducer+
+                    process.flashggEXOTagProducer*
                     process.exoTagDumper
                     )
 
