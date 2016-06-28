@@ -255,8 +255,7 @@ flashggZPlusJetTag = cms.EDProducer("FlashggZPlusJetTagProducer",
                                     )
 
 
-from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
-flashggEXOTag = cms.EDProducer('FlashggEXOTagProducer',
+flashggEXOTag = cms.EDProducer("FlashggEXOTagProducer",
                                 inputTagJets= UnpackedJetCollectionVInputTag,
                                 ElectronTag= cms.InputTag("flashggSelectedElectrons"),
                                 DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
