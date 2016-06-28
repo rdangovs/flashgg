@@ -63,7 +63,7 @@ namespace flashgg {
             tokenJets_.push_back(token);
         }
 
-        produces<vector<EXOTag> >();
+        produces<vector<EXOTag>>();
 
     }
 
@@ -88,7 +88,7 @@ namespace flashgg {
         Handle<View<flashgg::Electron>> electrons;
         iEvent.getByToken(electronToken_,electrons);
 
-        std::auto_ptr<vector<EXOTag> >      tags  ( new vector<EXOTag> );
+        std::auto_ptr<vector<EXOTag>> tags(new vector<EXOTag>);
 
         for( unsigned int candIndex = 0; candIndex < diphotons->size() ; candIndex++ ) {
 

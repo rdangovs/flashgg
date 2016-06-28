@@ -18,14 +18,6 @@ process.TFileService = cms.Service( "TFileService",
                                     fileName = cms.string("EXOTagsDump.root"),
                                     closeFileFast = cms.untracked.bool(True) )
 
-from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
-process.flashggEXOTagProducer = cms.EDProducer('FlashggEXOTagProducer',
-                                                inputTagJets= UnpackedJetCollectionVInputTag,
-                                                ElectronTag= cms.InputTag("flashggSelectedElectrons"),
-                                                DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
-                                                rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
-                                                )
-
 
 from flashgg.Taggers.flashggTagOutputCommands_cff import tagDefaultOutputCommand
 import flashgg.Taggers.dumperConfigTools as cfgTools
@@ -111,7 +103,6 @@ customize.setDefault("targetLumi",1.e+4)
 customize(process)
 
 process.p1 = cms.Path(
-                    process.flashggEXOTagProducer*
                     process.exoTagDumper
                     )
 

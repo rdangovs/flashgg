@@ -254,3 +254,14 @@ flashggZPlusJetTag = cms.EDProducer("FlashggZPlusJetTagProducer",
                                     GenJetTag = cms.InputTag("slimmedGenJets")
                                     )
 
+
+from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
+flashggEXOTag = cms.EDProducer('FlashggEXOTagProducer',
+                                inputTagJets= UnpackedJetCollectionVInputTag,
+                                ElectronTag= cms.InputTag("flashggSelectedElectrons"),
+                                DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
+                                rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
+                                )
+
+
+
