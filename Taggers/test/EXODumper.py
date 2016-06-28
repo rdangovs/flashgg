@@ -22,7 +22,7 @@ from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
 process.flashggEXOTagProducer = cms.EDProducer('FlashggEXOTagProducer',
                                                 inputTagJets= UnpackedJetCollectionVInputTag,
                                                 ElectronTag= cms.InputTag("flashggSelectedElectrons"),
-                                                DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
+                                                DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
                                                 rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                                 )
 
