@@ -2,12 +2,18 @@
 
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
+from flashgg.MicroAOD.flashggJets_cfi import flashggBTag, maxJetCollections
 from FWCore.ParameterSet.VarParsing import VarParsing
 from flashgg.MetaData.samples_utils import SamplesManager
 
 
 process = cms.Process("EXOTagDumper")
-
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.load("flashgg.Systematics.flashggDiPhotonSystematics_cfi")
+process.load("flashgg.Systematics.flashggMuonSystematics_cfi")
+process.load("flashgg.Systematics.flashggElectronSystematics_cfi")
+process.load("flashgg.Systematics.flashggJetSystematics_cfi")
+process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -25,6 +31,21 @@ process.TFileService = cms.Service( "TFileService",
 
 import flashgg.Taggers.dumperConfigTools as cfgTools
 from  flashgg.Taggers.tagsDumpers_cfi import createTagDumper
+
+
+process.flashggUnpackedJets = cms.EDProducer( "FlashggVectorVectorJetUnpacker",
+                                              JetsTag = cms.InputTag("flashggFinalJets"),
+                                              NCollections = cms.uint32(8))
+
+from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
+process.flashggEXOTag = cms.EDProducer("FlashggEXOTagProducer",
+                                inputTagJets= UnpackedJetCollectionVInputTag,
+                                ElectronTag= cms.InputTag("flashggSelectedElectrons"),
+                                DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
+                                rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
+                                )
+
+
 
 process.exoTagDumper = createTagDumper("EXOTag")
 process.exoTagDumper.dumpTrees = True
@@ -105,9 +126,6 @@ customize.setDefault("maxEvents",-1)
 customize.setDefault("targetLumi",1.e+4)
 customize(process)
 
-process.p1 = cms.Path( process.exoTagDumper
-                     )
+process.p1 = cms.Path( process.flashggUnpackedJets+process.flashggEXOTag+process.exoTagDumper )
 
 print process.p1
-
-

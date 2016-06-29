@@ -9,14 +9,12 @@
 
 #include "flashgg/DataFormats/interface/DiPhotonCandidate.h"
 #include "flashgg/DataFormats/interface/EXOTag.h"
-//#include "flashgg/DataFormats/interface/EXOTagTruth.h"
 #include "flashgg/DataFormats/interface/Jet.h"
 
 #include "DataFormats/Common/interface/RefToPtr.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
-
 
 #include <vector>
 #include <algorithm>
@@ -63,7 +61,7 @@ namespace flashgg {
             tokenJets_.push_back(token);
         }
 
-        produces<vector<EXOTag>>();
+        produces<vector<EXOTag> >();
 
     }
 
@@ -88,7 +86,7 @@ namespace flashgg {
         Handle<View<flashgg::Electron>> electrons;
         iEvent.getByToken(electronToken_,electrons);
 
-        std::auto_ptr<vector<EXOTag>> tags(new vector<EXOTag>);
+        std::auto_ptr<vector<EXOTag> > tags(new vector<EXOTag>);
 
         for( unsigned int candIndex = 0; candIndex < diphotons->size() ; candIndex++ ) {
 
