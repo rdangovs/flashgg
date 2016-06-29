@@ -54,7 +54,7 @@ string writeOn = "/afs/cern.ch/user/r/rdangovs/public/Plots2/";
 vector <Plot> getPlotDetails (); 
 void makePlot(TTree* tree, Plot &info);
 
-vector <TH1F> histograms;
+vector <TH1F*> histograms;
 
 void plotManipulator () {
 	cout << "-----------------------------------------" << endl << "Wellcome to plotManipulator!" << endl << "-----------------------------------------" << endl; 
@@ -63,7 +63,8 @@ void plotManipulator () {
 	TCanvas c1 ("c1", "c1", 500, 500); 
 
 	//chooses the tree to work with
-	TFile *_file0 = TFile::Open ("/afs/cern.ch/user/r/rdangovs/EXO_8_0_3_patch2/src/DataCollection/backgroundCut2.root"); 
+	TFile *_file0 = TFile::Open ("/afs/cern.ch/user/r/rdangovs/private/EXO_diphoton/CMSSW_8_0_8_patch1/src/flashgg/rumenTree.root");
+	//TFile *_file0 = TFile::Open ("/afs/cern.ch/user/r/rdangovs/EXO_8_0_3_patch2/src/DataCollection/backgroundCut2.root"); 
 	//TFile *_file0 = TFile::Open ("/afs/cern.ch/work/j/jwright/public/Louie/output_extras.root");
 	TTree *tree = (TTree*)_file0->Get("flashggEXOValidationTreeMaker/diphotonTree_");
 	
@@ -77,13 +78,16 @@ void plotManipulator () {
 	
 	std::cout << histograms.size () << std::endl;
 	
+	TCanvas c2 ("c2", "c2", 500, 500);
+
 	TH1F hans = (*histograms[0]) + (*histograms[1]); 
-	
-        hans->SetName("SumPt");
-        hans->SetTitle(Form("Sum of the Pt: Cat%d", 0);
-        hans->GetXaxis()->SetTitle("#Sigma P_t");
-        hans->GetYaxis()->SetTitle("dN/d(#Sigma P_t)");
-	
+	hans.Draw();
+	/*
+        hans.SetName("SumPt");
+        hans.SetTitle("sum of pt, cat 0");
+        hans.GetXaxis()->SetTitle("#Sigma P_t");
+        hans.GetYaxis()->SetTitle("dN/d(#Sigma P_t)");
+	*/
 	/*
         hist->SetMarkerColor(kBlack);
         hist->SetStats(kFALSE);
@@ -97,11 +101,11 @@ void plotManipulator () {
         hist->Draw("CONTE1bar");
 
         if (info.isYLog) c2.SetLogy();
-
-
+	*/
+		
         c2.Print(Form("sum.pdf",writeOn.c_str()));
         c2.Print(Form("sum.png",writeOn.c_str()));
-	*/
+	
 
 	/*
 	string input; 
@@ -179,6 +183,7 @@ vector<Plot> getPlotDetails(){
     info.yLabel = "dN/dm_{#gamma#gamma}";
     info.isXLog = false;
     info.isYLog = true;
+    info.cuts = "mgg < 600";
     plotInfo.push_back(info);
 
     info.category = 1;
