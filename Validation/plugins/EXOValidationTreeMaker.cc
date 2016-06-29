@@ -295,6 +295,7 @@ private:
 };
 
 EXOValidationTreeMaker::EXOValidationTreeMaker( const edm::ParameterSet &iConfig ):
+
     inputTagJets_( iConfig.getParameter<std::vector<edm::InputTag> >( "inputTagJets" ) ),
     electronToken_( consumes<View<flashgg::Electron>>(iConfig.getParameter<edm::InputTag>("ElectronTag"))),
     diPhotonToken_( consumes<View<flashgg::DiPhotonCandidate> >( iConfig.getParameter<InputTag> ( "DiPhotonTag" ) ) ),
@@ -318,7 +319,10 @@ EXOValidationTreeMaker::~EXOValidationTreeMaker()
 void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
+    cout << "Analyze in progress" << endl; 
+
     eInfo.init();
+    
 
     //Set cat boundaries
     float boundaryEB(1.4442);
@@ -339,14 +343,12 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     int  maxDiphoIndex(-1);
     for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
         
-        cout << diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt() << " "; 
-
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
-            std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
+            //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
             continue;
         }
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
-            std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
+            //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
             continue;
         }
 
@@ -362,9 +364,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
     if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
         
-        //std::cout << "Hello!" << std::endl; 
-
-
         //Category selection
         if (fabs(diPhotons->ptrAt(maxDiphoIndex)->leadingPhoton()->eta()) < boundaryEB){
             leadCat = 0;
@@ -384,8 +383,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             eInfo.category = 1;
         }
         
-        //std::cout << "Hello1" << std::endl;
-
         //Preselection
         float ptCut(75),mggCutEBEB(230),mggCutEBEE(320);
 
@@ -413,8 +410,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
             Ptr<flashgg::DiPhotonCandidate> diphoton = diPhotons->ptrAt(maxDiphoIndex);
             FillDiphotonInfo(diphoton);
             
-            std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
-            std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
+            //std::cout << "CANDIDATE PHOTON HAS INDEX " << maxDiphoIndex << std::endl;
+            //std::cout << " mgg is iPhotons->ptrAt(maxDiphoIndex)->mass() " << diPhotons->ptrAt(maxDiphoIndex)->mass()  <<std::endl;
 
             //EXTRA OBJECTS
             
@@ -635,6 +632,7 @@ void EXOValidationTreeMaker::FillDiphotonInfo(Ptr<flashgg::DiPhotonCandidate> di
 void
 EXOValidationTreeMaker::beginJob()
 {
+    cout << "Job begins" << endl;
     // +++ trees
     std::string type( "diphotonTree_" );
 
@@ -699,7 +697,7 @@ EXOValidationTreeMaker::beginJob()
 
 void EXOValidationTreeMaker::endJob()
 {
-
+    cout << "Job ends" << endl;
 }
 
 void EXOValidationTreeMaker::initEventStructure()
@@ -740,6 +738,7 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
 
 
 bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const double rho){
+    cout << "PhotonIDCuts in progress" << endl;
     float eta = pho->superCluster()->eta();
     int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
     int weird = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
