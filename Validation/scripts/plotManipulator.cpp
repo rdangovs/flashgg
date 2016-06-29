@@ -54,7 +54,7 @@ string writeOn = "/afs/cern.ch/user/r/rdangovs/public/Plots2/";
 vector <Plot> getPlotDetails (); 
 void makePlot(TTree* tree, Plot &info);
 
-vector <TH1F*> histograms;
+vector <TH1F> histograms;
 
 void plotManipulator () {
 	cout << "-----------------------------------------" << endl << "Wellcome to plotManipulator!" << endl << "-----------------------------------------" << endl; 
@@ -75,8 +75,34 @@ void plotManipulator () {
 	for (int i = 0; i < variables.size (); ++ i) 
 		makePlot (tree, variables[i]); 
 	
-	//std::cout << histograms.size () << std::endl;
+	std::cout << histograms.size () << std::endl;
+	
 	TH1F hans = (*histograms[0]) + (*histograms[1]); 
+	
+        hans->SetName("SumPt");
+        hans->SetTitle(Form("Sum of the Pt: Cat%d", 0);
+        hans->GetXaxis()->SetTitle("#Sigma P_t");
+        hans->GetYaxis()->SetTitle("dN/d(#Sigma P_t)");
+	
+	/*
+        hist->SetMarkerColor(kBlack);
+        hist->SetStats(kFALSE);
+        hist->SetMarkerStyle(27);
+        hist->SetLineWidth(2);
+
+        gStyle->SetEndErrorSize(3);
+        hist->SetMarkerStyle(20);
+
+        hist->SetFillColor(30);
+        hist->Draw("CONTE1bar");
+
+        if (info.isYLog) c2.SetLogy();
+
+
+        c2.Print(Form("sum.pdf",writeOn.c_str()));
+        c2.Print(Form("sum.png",writeOn.c_str()));
+	*/
+
 	/*
 	string input; 
 	while (true) { 
@@ -120,7 +146,6 @@ void makePlot (TTree *tree, Plot &info) {
 	gStyle->SetEndErrorSize(3);
 	hist->SetMarkerStyle(20);
 	
-	//void SetHistFillColor(Color_t color = 30);
 	hist->SetFillColor(30);
 	hist->Draw("CONTE1bar");
 

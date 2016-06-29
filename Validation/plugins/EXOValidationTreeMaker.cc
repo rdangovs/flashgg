@@ -101,6 +101,7 @@ struct diphotonInfo {
     float leadPhiSC        ;
     float subLeadPhiSC     ;
     int   category;
+    int   refinedCategory; //0 for central EBEB, 1 for the remaining EBEB, 2 for the EBEE
     float leadChargedHadronIso;
     float leadPfPhoIso03;
     float leadFull5x5_sigmaIetaIeta;
@@ -166,6 +167,7 @@ struct diphotonInfo {
         leadPhiSC    = -999;
         subLeadPhiSC = -999;
         category     = -999;
+        refinedCategory = -999;
         leadChargedHadronIso = -999;
         leadPfPhoIso03 = -999;
         leadFull5x5_sigmaIetaIeta = -999;
@@ -319,7 +321,6 @@ EXOValidationTreeMaker::~EXOValidationTreeMaker()
 void
 EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup )
 {
-    cout << "Analyze in progress" << endl; 
 
     eInfo.init();
     
@@ -343,6 +344,8 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
     int  maxDiphoIndex(-1);
     for( unsigned int diphoIndex = 0; diphoIndex < diPhotonsSize; diphoIndex++ ) {
         
+ //       cout << "DEBUG: removed the ID cuts to create a reasonable tree for practice." << endl; 
+        /*       
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->leadingPhoton(),rhoFixedGrd)){ 
             //std::cout << "DEBUG LC diphoton" << diphoIndex << " lead photon failed photonID cuts" << std::endl;
             continue;
@@ -350,7 +353,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         if (!passPhotonIDCuts(diPhotons->ptrAt(diphoIndex)->subLeadingPhoton(),rhoFixedGrd)){ 
             //std::cout << "DEBUG LC diphoton" << diphoIndex << " sublead photon failed photonID cuts" << std::endl;
             continue;
-        }
+        }*/
 
         float tempPt = diPhotons->ptrAt(diphoIndex)->leadingPhoton()->pt()+diPhotons->ptrAt(diphoIndex)->subLeadingPhoton()->pt();
         if (tempPt > maxDiphoPt){
@@ -360,7 +363,6 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
 
     }
     
-    std::cout << std::endl << "this is the index! " << maxDiphoIndex << std::endl;
 
     if (diPhotonsSize > 0 &&  maxDiphoIndex>-1){
         
@@ -382,7 +384,13 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }else if ((leadCat == 0 && subLeadCat == 1) || (leadCat == 1 && subLeadCat == 0)){
             eInfo.category = 1;
         }
+
+        eInfo.refinedCategory = eInfo.category + 1; 
+        if (fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta()) < 1 && fabs(diPhotons->ptrAt(maxDiphoIndex)->subLeadingPhoton()->eta())  < 1) 
+            eInfo.refinedCategory = 0; 
         
+        cout << eInfo.refinedCategory << endl; 
+
         //Preselection
         float ptCut(75),mggCutEBEB(230),mggCutEBEE(320);
 
@@ -403,7 +411,7 @@ EXOValidationTreeMaker::analyze( const edm::Event &iEvent, const edm::EventSetup
         }
         
         //debug 
-        std::cout << passesPtCut << " " << passesLeadEtaSCCut << " " << passesSubLeadEtaSCCut << " " << passesOneBarrelEtaSCCut << " " << passesMassCut << std::endl;   
+ //       std::cout << passesPtCut << " " << passesLeadEtaSCCut << " " << passesSubLeadEtaSCCut << " " << passesOneBarrelEtaSCCut << " " << passesMassCut << std::endl;   
 
         if (passesPtCut && passesLeadEtaSCCut && passesSubLeadEtaSCCut && passesOneBarrelEtaSCCut && passesMassCut){
 
@@ -632,7 +640,6 @@ void EXOValidationTreeMaker::FillDiphotonInfo(Ptr<flashgg::DiPhotonCandidate> di
 void
 EXOValidationTreeMaker::beginJob()
 {
-    cout << "Job begins" << endl;
     // +++ trees
     std::string type( "diphotonTree_" );
 
@@ -648,6 +655,7 @@ EXOValidationTreeMaker::beginJob()
     diphotonTree->Branch( "leadPhiSC    " , &eInfo.leadPhiSC     , Form("%s/F","leadPhiSC"));
     diphotonTree->Branch( "subLeadPhiSC " , &eInfo.subLeadPhiSC  , Form("%s/F","subLeadPhiSC"));
     diphotonTree->Branch( "category " , &eInfo.category  , Form("%s/I","category"));
+    diphotonTree->Branch( "refinedCategory ", &eInfo.refinedCategory, Form("%s/I", "refinedCategory")); //addition of refined category
     diphotonTree->Branch( "leadChargedHadronIso " , &eInfo.leadChargedHadronIso  , Form("%s/F","leadChargedHadronIso"));
     diphotonTree->Branch( "leadPfPhoIso03 " , &eInfo.leadPfPhoIso03  , Form("%s/F","leadPfPhoIso03"));
     diphotonTree->Branch( "leadFull5x5_sigmaIetaIeta " , &eInfo.leadFull5x5_sigmaIetaIeta  , Form("%s/F","leadFull5x5_sigmaIetaIeta"));
@@ -697,7 +705,6 @@ EXOValidationTreeMaker::beginJob()
 
 void EXOValidationTreeMaker::endJob()
 {
-    cout << "Job ends" << endl;
 }
 
 void EXOValidationTreeMaker::initEventStructure()
@@ -738,7 +745,6 @@ float EXOValidationTreeMaker::correctIsoGam(const flashgg::Photon* pho, const do
 
 
 bool EXOValidationTreeMaker::passPhotonIDCuts(const flashgg::Photon* pho, const double rho){
-    cout << "PhotonIDCuts in progress" << endl;
     float eta = pho->superCluster()->eta();
     int saturated = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kSaturated));
     int weird = int(pho->checkStatusFlag(flashgg::Photon::rechitSummaryFlags_t::kWeird));
