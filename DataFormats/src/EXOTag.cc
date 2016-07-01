@@ -9,7 +9,9 @@ EXOTag::EXOTag() {}
 EXOTag::~EXOTag() {}
 
 EXOTag::EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<flashgg::Jet>> &jets, 
-                edm::Handle<edm::View<flashgg::Electron>> &electrons, double rhoFixedGrid, unsigned eventNumber){
+                edm::Handle<edm::View<flashgg::Electron>> &electrons, double rhoFixedGrid, unsigned eventNumber):
+            DiPhotonTagBase::DiPhotonTagBase()
+{
 
     eventNumber_=eventNumber;
 
