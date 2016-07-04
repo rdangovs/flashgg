@@ -17,7 +17,7 @@ process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1000 )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1 )
 
 
 process.source = cms.Source("PoolSource",
@@ -107,7 +107,7 @@ jet_vars = [
         "dijet_DeltaEta := getDijetDeltaEta()",
         "dijet_Zeppenfeld := getDijetZeppenfeld()",
         "dijet_DeltaPhi_jj := getDijetDeltaPhi_jj()",
-        "dijet_DeltaPhigg_jj := getDijetDeltaPhigg_jj()"
+        "dijet_DeltaPhi_ggjj := getDijetDeltaPhi_ggjj()"
 
         ]
         

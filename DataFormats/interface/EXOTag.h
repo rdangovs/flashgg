@@ -24,72 +24,72 @@ namespace flashgg {
         EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<flashgg::Jet>> &jets, 
                 edm::Handle<edm::View<flashgg::Electron>> &electrons, double rhoFixedGrid, unsigned eventNumber);
 
-        const unsigned getEventNumber();
+        const unsigned getEventNumber() const ;
 
-        const int   getDiphotonCutsPass();
+        int   getDiphotonCutsPass() const ;
 
-        const float getDiphotonMass();
-        const int   getDiphotonNConv();
-        const float getDiphotonPullConv();
+        float getDiphotonMass() const ;
+        int   getDiphotonNConv() const ;
+        float getDiphotonPullConv() const ;
 
-        const float getDiphotonLeadPt(); 
-        const float getDiphotonSubleadPt(); 
-        const float getDiphotonLeadEta(); 
-        const float getDiphotonSubleadEta(); 
+        float getDiphotonLeadPt() const ; 
+        float getDiphotonSubleadPt() const ; 
+        float getDiphotonLeadEta() const ; 
+        float getDiphotonSubleadEta() const ; 
 
-        const float getDiphotonLeadR9();
-        const float getDiphotonSubleadR9();
-        const float getDiphotonLeadEtaSC();
-        const float getDiphotonSubleadEtaSC();
-        const float getDiphotonLeadPhiSC();
-        const float getDiphotonSubleadPhiSC();
-        const int   getDiphotonCategory();
+        float getDiphotonLeadR9() const ;
+        float getDiphotonSubleadR9() const ;
+        float getDiphotonLeadEtaSC() const ;
+        float getDiphotonSubleadEtaSC() const ;
+        float getDiphotonLeadPhiSC() const ;
+        float getDiphotonSubleadPhiSC() const ;
+        int   getDiphotonCategory() const ;
 
-        const float getDiphotonLeadCHI();
-        const float getDiphotonSubleadCHI();
-        const float getDiphotonLeadEGPhoIso();
-        const float getDiphotonSubleadEGPhoIso();
-        const float getDiphotonLeadF5x5SigmaIetaIeta();
-        const float getDiphotonSubleadF5x5SigmaIetaIeta();
-        const float getDiphotonLeadFull5x5R9();
-        const float getDiphotonSubleadFull5x5R9();
-        const float getDiphotonLeadHadronicOverEM();
-        const float getDiphotonSubleadHadronicOverEM();
+        float getDiphotonLeadCHI() const ;
+        float getDiphotonSubleadCHI() const ;
+        float getDiphotonLeadEGPhoIso() const ;
+        float getDiphotonSubleadEGPhoIso() const ;
+        float getDiphotonLeadF5x5SigmaIetaIeta() const ;
+        float getDiphotonSubleadF5x5SigmaIetaIeta() const ;
+        float getDiphotonLeadFull5x5R9() const ;
+        float getDiphotonSubleadFull5x5R9() const ;
+        float getDiphotonLeadHadronicOverEM() const ;
+        float getDiphotonSubleadHadronicOverEM() const ;
 
-        const int getDiphotonLeadIsSaturated();
-        const int getDiphotonSubleadIsSaturated();
-        const int getDiphotonLeadPassElectronVeto();
-        const int getDiphotonSubleadPassElectronVeto();
+        int getDiphotonLeadIsSaturated() const ;
+        int getDiphotonSubleadIsSaturated() const ;
+        int getDiphotonLeadPassElectronVeto() const ;
+        int getDiphotonSubleadPassElectronVeto() const ;
 
         //Jet variables
-        const int getJetMultiplicities_All();
-        const int getJetMultiplicities_EGT20();
-        const int getJetMultiplicities_EGT30();
-        const int getJetMultiplicities_EGT40();
+        int getJetMultiplicities_All() const ;
+        int getJetMultiplicities_EGT20() const ;
+        int getJetMultiplicities_EGT30() const ;
+        int getJetMultiplicities_EGT40() const ;
 
-        const float getDijetLeadPt(); 
-        const float getDijetSubleadPt(); 
-        const float getDijetLeadEta(); 
-        const float getDijetSubleadEta(); 
-        const float getDijetMass();
-        const float getDijetDeltaEta();
-        const float getDijetZeppenfeld();
-        const float getDijetDeltaPhi_jj();
-        const float getDijetDeltaPhi_ggjj();
+        float getDijetLeadPt() const ; 
+        float getDijetSubleadPt() const ; 
+        float getDijetLeadEta() const ; 
+        float getDijetSubleadEta() const ; 
+        float getDijetMass() const ;
+        float getDijetDeltaEta() const ;
+        float getDijetZeppenfeld() const ;
+        float getDijetDeltaPhi_jj() const ;
+        float getDijetDeltaPhi_ggjj() const ;
 
         //Electron variables
-        const int getElectronMultiplicity_EGT35();
-        const int getElectronMultiplicity_EGT75();
+        int getElectronMultiplicity_EGT35() const ;
+        int getElectronMultiplicity_EGT75() const ;
 
-        const float getDielectronLeadPt(); 
-        const float getDielectronSubleadPt(); 
-        const float getDielectronLeadEta(); 
-        const float getDielectronSubleadEta(); 
-        const float getDielectronMass();
-        const float getDielectronDeltaEta();
-        const float getDielectronZeppenfeld();
-        const float getDielectronDeltaPhi_ee();
-        const float getDielectronDeltaPhi_ggee();
+        float getDielectronLeadPt() const ; 
+        float getDielectronSubleadPt() const ; 
+        float getDielectronLeadEta() const ; 
+        float getDielectronSubleadEta() const ; 
+        float getDielectronMass() const ;
+        float getDielectronDeltaEta() const ;
+        float getDielectronZeppenfeld() const ;
+        float getDielectronDeltaPhi_ee() const ;
+        float getDielectronDeltaPhi_ggee() const ;
 
     private:
         unsigned eventNumber_;
@@ -117,11 +117,11 @@ namespace flashgg {
         void setHasJets();
         void setHasElectrons();
 
-        const int countJetsOverPT(float ptCut);
-        const int countElectronsOverPT(float ptCut);
+        int countJetsOverPT(float ptCut) const ;
+        int countElectronsOverPT(float ptCut) const ;
 
-        bool passPhotonIDCuts(const flashgg::Photon* pho, const double rho);
-        float correctIsoGam(const flashgg::Photon* pho, const double rho);
+        bool passPhotonIDCuts(const flashgg::Photon* pho) const ;
+        float correctIsoGam(const flashgg::Photon* pho) const ;
     };
 
 }
