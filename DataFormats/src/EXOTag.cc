@@ -21,18 +21,19 @@ EXOTag::EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<fla
     rhoFixedGrid_ = rhoFixedGrid;
 
     jets_=jets;
-    setHasJets();
-    setDijet();
 
     electrons_=electrons;
-    setHasElectrons();
-    setDielectron();
 
     if (!hasDiphoton_){
         hasJets_ = false;
         hasDijet_ = false;
         hasElectrons_ = false;
         hasDielectron_ = false;
+    }else{
+        setHasJets();
+        setDijet();
+        setHasElectrons();
+        setDielectron();
     }
 
 }
@@ -331,6 +332,7 @@ int EXOTag::countJetsOverPT(float ptCut) const {
     
     unsigned count(0);
     for (unsigned i=0;i<jets_->size();i++){
+
         edm::Ptr<flashgg::Jet> jet = jets_->ptrAt(i);
 
         float dR_leadDP = deltaR(jet->eta(),jet->phi(),diphoton_->leadingPhoton()->eta(),diphoton_->leadingPhoton()->phi());
@@ -338,6 +340,7 @@ int EXOTag::countJetsOverPT(float ptCut) const {
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
         if (jet->pt() > ptCut) count++;
     }
+    
     return count;
 }
 
@@ -357,10 +360,10 @@ int EXOTag::countElectronsOverPT(float ptCut) const {
 
        
         
-int EXOTag::getJetMultiplicities_All() const {return countJetsOverPT(0.0);}
-int EXOTag::getJetMultiplicities_EGT20() const {return countJetsOverPT(20);}
-int EXOTag::getJetMultiplicities_EGT30() const {return countJetsOverPT(30);}
-int EXOTag::getJetMultiplicities_EGT40() const {return countJetsOverPT(40);}
+int EXOTag::getJetMultiplicities_All() const {return hasJets_ ? countJetsOverPT(0.0) : -999.;}
+int EXOTag::getJetMultiplicities_EGT20() const {return hasJets_ ? countJetsOverPT(20) : -999.;}
+int EXOTag::getJetMultiplicities_EGT30() const {return hasJets_ ? countJetsOverPT(30) : -999.;}
+int EXOTag::getJetMultiplicities_EGT40() const {return hasJets_ ? countJetsOverPT(40) : -999.;}
 
 float EXOTag::getDijetLeadPt() const { return hasDijet_ ? dijet_.first->pt() : -999.; }
 float EXOTag::getDijetSubleadPt() const { return hasDijet_ ? dijet_.second->pt() : -999.; }

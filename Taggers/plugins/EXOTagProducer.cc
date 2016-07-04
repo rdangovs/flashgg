@@ -96,7 +96,6 @@ namespace flashgg {
 
             EXOTag exoTag(diphoton,jets,electrons,rhoFixedGrd,event_number);
             tags->push_back(exoTag);
-
         }
         iEvent.put( tags );
 
