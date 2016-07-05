@@ -1,6 +1,7 @@
 #include "flashgg/DataFormats/interface/DiPhotonCandidate.h"
 #include "flashgg/DataFormats/interface/EXOTag.h"
 #include "CommonTools/CandUtils/interface/AddFourMomenta.h"
+#include <cmath> 
 
 using namespace flashgg;
 
@@ -144,6 +145,20 @@ float EXOTag::getDiphotonLeadPhiSC() const { return hasDiphoton_ ? diphoton_->le
 
 float EXOTag::getDiphotonSubleadPhiSC() const { return hasDiphoton_ ? diphoton_->subLeadingPhoton()->superCluster()->phi() : -999.; }
 
+float EXOTag::getDiphotonCosThetaStar() const {
+    return hasDiphoton_ ? 
+        (float) (2 * (diphoton_->subLeadingPhoton()->energy() * 
+                      diphoton_->leadingPhoton()->pz() - 
+                      diphoton_->leadingPhoton()->energy() * 
+                      diphoton_->subLeadingPhoton()->pz ()
+                     ) / 
+                     (diphoton_->mass() * sqrt (diphoton_->mass() * diphoton_->mass() + 
+                                                       diphoton_->pt() * diphoton_->pt ()
+                                               )
+                     )
+                ) : -999.; 
+}
+    
 int EXOTag::getDiphotonCategory() const {
 
     if (!hasDiphoton_){
