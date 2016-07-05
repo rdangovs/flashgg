@@ -55,6 +55,8 @@ namespace flashgg {
         float getDiphotonSubleadFull5x5R9() const ;
         float getDiphotonLeadHadronicOverEM() const ;
         float getDiphotonSubleadHadronicOverEM() const ;
+        
+        float getDiphotonCosThetaStar() const ;
 
         int getDiphotonLeadIsSaturated() const ;
         int getDiphotonSubleadIsSaturated() const ;
