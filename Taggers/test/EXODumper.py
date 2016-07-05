@@ -21,11 +21,19 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 2500 )
 
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring("/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root"))
+                            fileNames = cms.untracked.vstring(
+#MC simulation: sample 2 
+#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-01_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v2/160527_170740/0000/diphotonsMicroAOD_1.root"
 
+#MC simulation: sample 1
+#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-001_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/160527_170715/0000/diphotonsMicroAOD_1.root"
+
+"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root"
+							     ))
 
 process.TFileService = cms.Service( "TFileService",
-                                    fileName = cms.string("EXOTagsDump.root"),
+                                    #fileName = cms.string("EXOTagsDump.root"),
+				    fileName = cms.string("EXOTagsDump2.root"),
                                     closeFileFast = cms.untracked.bool(True) )
 
 
