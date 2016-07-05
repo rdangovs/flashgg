@@ -17,7 +17,7 @@ process.flashggDiPhotonSystematics.src='flashggDiPhotons'
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 1000 )
+process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 2500 )
 
 
 process.source = cms.Source("PoolSource",
@@ -55,6 +55,7 @@ process.exoTagDumper.dumpWorkspace = False
 diphoton_vars = [
 
         "eventID := getEventNumber()",
+
         "diphoton_Mass := getDiphotonMass()",
         "diphoton_NConv := getDiphotonNConv()",
         "diphoton_PullCov := getDiphotonPullConv()",
@@ -110,8 +111,26 @@ jet_vars = [
         "dijet_DeltaPhi_ggjj := getDijetDeltaPhi_ggjj()"
 
         ]
+
+electron_vars = [
+
+ 
+        "electrons_multiplicites_EGT35 := getElectronMultiplicity_EGT35()",
+        "electrons_multiplicites_EGT75 := getElectronMultiplicity_EGT75()",
+
+        "dielectron_LeadPt := getDielectronLeadPt()",
+        "dielectron_SubleadPt := getDielectronSubleadPt()",
+        "dielectron_LeadEta := getDielectronLeadEta()",
+        "dielectron_SubleadEta := getDielectronSubleadEta()",
+        "dielectron_Mass := getDielectronMass()",
+        "dielectron_DeltaEta := getDielectronDeltaEta()",
+        "dielectron_Zeppenfeld := getDielectronZeppenfeld()",
+        "dielectron_DeltaPhi_ee := getDielectronDeltaPhi_ee()",
+        "dielectron_DeltaPhi_ggee := getDielectronDeltaPhi_ggee()"
+
+        ]
         
-all_var = diphoton_vars + jet_vars
+all_var = diphoton_vars + jet_vars + electron_vars
 
 cfgTools.addCategories(process.exoTagDumper,
                         [("test","getDiphotonMass()>0",0)],

@@ -346,6 +346,8 @@ int EXOTag::countJetsOverPT(float ptCut) const {
 
 int EXOTag::countElectronsOverPT(float ptCut) const {
 
+    if (electrons_->size() > 1000 || electrons_->size()==0) return 0;   
+ 
     unsigned count(0);
     for (unsigned i=0;i<electrons_->size();i++){
         edm::Ptr<flashgg::Electron> electron = electrons_->ptrAt(i);
@@ -355,15 +357,16 @@ int EXOTag::countElectronsOverPT(float ptCut) const {
         if (dR_leadDP < 0.5 || dR_subLeadDP < 0.5) continue;
         if (electron->pt()) count++;
     }
+    
     return count;
 }
 
        
         
-int EXOTag::getJetMultiplicities_All() const {return hasJets_ ? countJetsOverPT(0.0) : -999.;}
-int EXOTag::getJetMultiplicities_EGT20() const {return hasJets_ ? countJetsOverPT(20) : -999.;}
-int EXOTag::getJetMultiplicities_EGT30() const {return hasJets_ ? countJetsOverPT(30) : -999.;}
-int EXOTag::getJetMultiplicities_EGT40() const {return hasJets_ ? countJetsOverPT(40) : -999.;}
+int EXOTag::getJetMultiplicities_All() const {return hasJets_ ? countJetsOverPT(0.0) : 0;}
+int EXOTag::getJetMultiplicities_EGT20() const {return hasJets_ ? countJetsOverPT(20) : 0;}
+int EXOTag::getJetMultiplicities_EGT30() const {return hasJets_ ? countJetsOverPT(30) : 0;}
+int EXOTag::getJetMultiplicities_EGT40() const {return hasJets_ ? countJetsOverPT(40) : 0;}
 
 float EXOTag::getDijetLeadPt() const { return hasDijet_ ? dijet_.first->pt() : -999.; }
 float EXOTag::getDijetSubleadPt() const { return hasDijet_ ? dijet_.second->pt() : -999.; }
@@ -375,8 +378,8 @@ float EXOTag::getDijetZeppenfeld() const { return hasDijet_ ? fabs(diphoton_->et
 float EXOTag::getDijetDeltaPhi_jj() const { return hasDijet_ ? fabs(deltaPhi(dijet_.first->phi() , dijet_.second->phi())) : -999.; } 
 float EXOTag::getDijetDeltaPhi_ggjj() const { return hasDijet_ ? fabs(deltaPhi(diphoton_->phi() , (dijet_.first->p4()+dijet_.second->p4()).Phi())) : -999; }
 
-int EXOTag::getElectronMultiplicity_EGT35() const {return countElectronsOverPT(35);}
-int EXOTag::getElectronMultiplicity_EGT75() const {return countElectronsOverPT(75);}
+int EXOTag::getElectronMultiplicity_EGT35() const {return hasElectrons_ ? countElectronsOverPT(35) : 0;}
+int EXOTag::getElectronMultiplicity_EGT75() const {return hasElectrons_ ? countElectronsOverPT(75) : 0;}
 
 float EXOTag::getDielectronLeadPt() const { return hasDielectron_ ? dielectron_.first->pt() : -999.; }
 float EXOTag::getDielectronSubleadPt() const { return hasDielectron_ ? dielectron_.second->pt() : -999.; }
