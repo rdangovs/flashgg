@@ -32,8 +32,8 @@ process.source = cms.Source("PoolSource",
 							     ))
 
 process.TFileService = cms.Service( "TFileService",
-                                    #fileName = cms.string("EXOTagsDump.root"),
-				    fileName = cms.string("EXOTagsDump2.root"),
+                                    fileName = cms.string("EXOTagsDump.root"),
+				    #fileName = cms.string("EXOTagsDump2.root"),
                                     closeFileFast = cms.untracked.bool(True) )
 
 
@@ -63,7 +63,8 @@ process.exoTagDumper.dumpWorkspace = False
 diphoton_vars = [
 
         "eventID := getEventNumber()",
-
+		
+	"diphoton_CosThetaStar := getDiphotonCosThetaStar()",
         "diphoton_Mass := getDiphotonMass()",
         "diphoton_NConv := getDiphotonNConv()",
         "diphoton_PullCov := getDiphotonPullConv()",
