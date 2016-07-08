@@ -5,7 +5,7 @@ import FWCore.Utilities.FileUtils as FileUtils
 from flashgg.MicroAOD.flashggJets_cfi import flashggBTag, maxJetCollections
 from FWCore.ParameterSet.VarParsing import VarParsing
 from flashgg.MetaData.samples_utils import SamplesManager
-
+import sys
 
 process = cms.Process("EXOTagDumper")
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -20,16 +20,59 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32( 2500 )
 
 
+def col(name,c):
+	""" Just a convention. 
+	"""
+	if c == "red": 
+		print ("\033[91m {}\033[00m" .format(name))
+	if c == "yellow":
+		print ("\033[93m {}\033[00m" .format(name))
+	if c == "green":
+		print ("\033[92m {}\033[00m" .format(name))
+
+while True: 
+	setting = raw_input('\nOptions: sim1, sim2, dat, ext (to exit).\nEnter your input: ')
+	if setting == "sim1": 
+		inp = "/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-001_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/160527_170715/0000/diphotonsMicroAOD_1.root" 
+		break
+	elif setting == "sim2": 
+		inp = "/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-01_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v2/160527_170740/0000/diphotonsMicroAOD_1.root"
+		break
+	elif setting == "dat": 
+		inp = "/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root"		
+		break 
+	elif setting == "ext": 
+		sys.exit ("Bye!")
+	else:
+		print "Sorry, not matched! Try again."
+
+print col(inp,"red"), "\n"
+
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
+inp
 #MC simulation: sample 2 
 #"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-01_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v2/160527_170740/0000/diphotonsMicroAOD_1.root"
 
 #MC simulation: sample 1
 #"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOSpring16_v1_p4/diphotons_80_v1/RSGravToGG_kMpl-001_M-750_TuneCUEP8M1_13TeV-pythia8/EXOSpring16_v1_p4-diphotons_80_v1-v0-RunIISpring16MiniAODv1-PUSpring16RAWAODSIM_80X_mcRun2_asymptotic_2016_v3-v1/160527_170715/0000/diphotonsMicroAOD_1.root"
 
-"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root"
+#"/store/group/phys_higgs/cmshgg/musella/flashgg/EXOMoriond16/1_2_0-136-ge8a0efc/DoubleEG/EXOMoriond16-1_2_0-136-ge8a0efc-v1-Run2015D-16Dec2015-v2/160211_163340/0000/myMicroAODOutputFile_387.root"
 							     ))
+
+import re 
+testString = str(process.source.fileNames)
+print testString 
+
+print "\n"
+fName = re.findall(r'\'([^]]*)\'', testString)[0]
+if "DoubleEG" in fName: 
+	print col("Use flashggSelectedElectrons","green")
+	electronString = "flashggSelectedElectrons"
+else:
+	print col("Use flashggElectrons","green")
+	electronString = "flashggElectrons"
+print "\n"
 
 process.TFileService = cms.Service( "TFileService",
                                     fileName = cms.string("EXOTagsDump.root"),
@@ -48,8 +91,9 @@ process.flashggUnpackedJets = cms.EDProducer( "FlashggVectorVectorJetUnpacker",
 from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
 process.flashggEXOTag = cms.EDProducer("FlashggEXOTagProducer",
                                 inputTagJets= UnpackedJetCollectionVInputTag,
-                                ElectronTag= cms.InputTag("flashggSelectedElectrons"),
-                                DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
+                               	ElectronTag= cms.InputTag(electronString),
+								#ElectronTag= cms.InputTag("flashggElectrons"),
+				DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
                                 rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                 )
 
@@ -155,5 +199,6 @@ customize.setDefault("targetLumi",1.e+4)
 customize(process)
 
 process.p1 = cms.Path( process.flashggUnpackedJets+process.flashggEXOTag+process.exoTagDumper )
+
 
 print process.p1

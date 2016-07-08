@@ -62,7 +62,7 @@ void exoTreeUpgrade () {
 	//TFile *_file0 = TFile::Open ("/afs/cern.ch/user/r/rdangovs/private/EXO_diphoton/CMSSW_8_0_8_patch1/src/flashgg/rumenTree.root");
 	//TFile *_file0 = TFile::Open ("/afs/cern.ch/user/r/rdangovs/EXO_8_0_3_patch2/src/DataCollection/backgroundCut2.root"); 
 	//TFile *_file0 = TFile::Open ("/afs/cern.ch/work/j/jwright/public/Louie/output_extras.root");
-	TTree *tree = (TTree*)_file0->Get("exoTagDumper/exo_13TeV_test");
+	TTree *tree = (TTree*)_file0->Get("exoTagDumper;1/trees;1/exo_13TeV_test;1");
 	//cout << "Hello2" << endl;
 	gStyle->SetOptStat(11111);
 	gStyle->SetOptFit(11111);
@@ -90,15 +90,12 @@ void makePlot (TTree *tree, Plot &info) {
 		cuts = Form ("(category==%d)", info.category); 
 	else 
 		cuts = ""; 
-	cout << "hey4" << endl;
 	
 	tree->Draw (Form ("%s>>h(%d,%f,%f)", info.var.c_str(), info.numBins, info.minX, info.maxX), cuts); 
 	
-	cout << "yo1" << endl; 
 
 	TH1F *h = (TH1F*)gPad->GetPrimitive("h");
 	
-	cout << "yo2" << endl;	
 	
 	//starts a new histogram
 	TH1F *hist = new TH1F(*h);
@@ -106,12 +103,15 @@ void makePlot (TTree *tree, Plot &info) {
 	hist->SetTitle(Form("%s Cat%d",info.title.c_str(),info.category));
 	hist->GetXaxis()->SetTitle(info.xLabel.c_str());
 	hist->GetYaxis()->SetTitle(info.yLabel.c_str());
+	
+	cout << "mhm" << endl;
 
 	hist->SetMarkerColor(kBlack);
 	hist->SetStats(kFALSE);
 	hist->SetMarkerStyle(27);
 	hist->SetLineWidth(2);
-										    
+	
+	cout << "mhm2" << endl;										    
 	gStyle->SetEndErrorSize(3);
 	hist->SetMarkerStyle(20);
 	
@@ -134,7 +134,7 @@ vector<Plot> getPlotDetails(){
     Plot info;
     
     //mgg
-    info.var = "mgg";
+    info.var = "diphoton_Mass";
     info.numBins = 69;
     info.minX = 230;
     info.maxX = 1610;
@@ -155,7 +155,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //pT(lead)
-    info.var = "leadPt";
+    info.var = "diphoton_LeadPt";
     info.numBins = 34;
     info.minX = 75;
     info.maxX = 1200;
@@ -187,7 +187,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //pT(subLead);
-    info.var = "subLeadPt";
+    info.var = "diphoton_SubleadPt";
     info.numBins = 34;
     info.minX = 75;
     info.maxX = 1200;
@@ -201,7 +201,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Lead R9
-    info.var = "leadR9";
+    info.var = "diphoton_LeadR9";
     info.numBins = 34;
     info.minX = 0;
     info.maxX = 1;
@@ -215,7 +215,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Sublead R9
-    info.var = "subLeadR9";
+    info.var = "diphoton_SubLeadR9";
     info.numBins = 34;
     info.minX = 0;
     info.maxX = 1;
@@ -229,7 +229,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Lead Supercluster eta
-    info.var = "leadEtaSC";
+    info.var = "diphoton_LeadEtaSC";
     info.numBins = 34;
     info.minX = -2.5;
     info.maxX = 2.5;
@@ -243,7 +243,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Sublead Supercluster eta
-    info.var = "subLeadEtaSC";
+    info.var = "diphoton_SubleadEtaSC";
     info.numBins = 34;
     info.minX = -2.5;
     info.maxX = 2.5;
@@ -257,7 +257,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Lead Supercluster phi
-    info.var = "leadPhiSC";
+    info.var = "diphoton_LeadPhiSC";
     info.numBins = 34;
     info.minX = -3.1415;
     info.maxX = 3.1415;
@@ -271,7 +271,7 @@ vector<Plot> getPlotDetails(){
     plotInfo.push_back(info);
 
     //Sublead Supercluster phi
-    info.var = "subLeadPhiSC";
+    info.var = "diphoton_SubleadPhiSC";
     info.numBins = 34;
     info.minX = -3.1415;
     info.maxX = 3.1415;
@@ -283,9 +283,9 @@ vector<Plot> getPlotDetails(){
 
     info.category = 1;
     plotInfo.push_back(info);
-
+/*
     //Lead Charged Hadron Isolation
-    info.var = "leadChargedHadronIso";
+    info.var = "diphoton_leadChargedHadronIso";
     info.numBins = 34;
     info.minX = 0;
     info.maxX = 5;
@@ -423,7 +423,7 @@ vector<Plot> getPlotDetails(){
 
     info.category = 1;
     plotInfo.push_back(info);
-	
+*/	
 	/*
     //Jet Multiplicity pt > 20
     info.var = "jetMultiplicity_EGT20";
