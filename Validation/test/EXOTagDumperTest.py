@@ -64,6 +64,7 @@ from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
 process.flashggEXOValidationTreeMaker = cms.EDAnalyzer('FlashggEXOValidationTreeMaker',
                                                             inputTagJets= UnpackedJetCollectionVInputTag,
                                                             ElectronTag= cms.InputTag("flashggSelectedElectrons"),
+#                                                            ElectronTag= cms.InputTag("flashggElectrons"),
                                                             DiPhotonTag     = cms.InputTag("flashggDiPhotonSystematics"),
                                                             rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                                             )

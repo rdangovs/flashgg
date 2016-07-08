@@ -10,7 +10,7 @@ EXOTag::EXOTag() {}
 EXOTag::~EXOTag() {}
 
 EXOTag::EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<flashgg::Jet>> &jets, 
-                edm::Handle<edm::View<flashgg::Electron>> &electrons, double rhoFixedGrid, unsigned eventNumber):
+                edm::Handle<edm::View<flashgg::Electron>> &electrons, edm::Handle<edm::View<flashgg::Muon>> &muons, double rhoFixedGrid, unsigned eventNumber):
             DiPhotonTagBase::DiPhotonTagBase()
 {
 
@@ -22,19 +22,23 @@ EXOTag::EXOTag( edm::Ptr<DiPhotonCandidate> &diphoton, edm::Handle<edm::View<fla
     rhoFixedGrid_ = rhoFixedGrid;
 
     jets_=jets;
-
     electrons_=electrons;
+    muons_=muons; 
 
     if (!hasDiphoton_){
         hasJets_ = false;
         hasDijet_ = false;
         hasElectrons_ = false;
         hasDielectron_ = false;
+        hasMuons_ = false; 
+        hasDimuon_ = false; 
     }else{
         setHasJets();
         setDijet();
         setHasElectrons();
         setDielectron();
+        setHasMuons(); 
+        setDimuon();
     }
 
 }
@@ -105,6 +109,35 @@ void EXOTag::setDielectron(){
 
 }
 
+void EXOTag::setDimuon() { 
+    float leadPt = 0, subleadPt = 0; 
+    int leadIndex = -1, subleadIndex = -1; 
+    
+    for (unsigned int i = 0; i < muons_->size(); ++ i) { 
+        edm::Ptr <flashgg::Muon> muon = muons_->ptrAt (i); 
+        
+        if (muon->pt() > leadPt) { 
+            subleadPt = leadPt; 
+            subleadIndex = leadIndex; 
+            leadPt = muon->pt (); 
+            leadIndex = i; 
+        }
+        else if (muon->pt () > subleadPt) { 
+            subleadPt = muon->pt(); 
+            subleadIndex = i; 
+        }
+    }
+
+    if (leadIndex == -1 || subleadIndex == -1) 
+        hasDimuon_ = false; 
+    else { 
+        hasDimuon_ = false; 
+        dimuon_.first = muons_->ptrAt (leadIndex); 
+        dimuon_.second = muons_->ptrAt (subleadIndex); 
+    }
+}
+
+
 void EXOTag::setHasJets(){
     if (EXOTag::countJetsOverPT(0.0) == 0){
         hasJets_ = false;
@@ -119,6 +152,13 @@ void EXOTag::setHasElectrons(){
     }else{
         hasElectrons_ = true;
     }
+}
+
+void EXOTag::setHasMuons () { 
+    if (EXOTag::countMuonsOverPT(0.0) == 0)  
+            hasMuons_ = false; 
+    else 
+            hasMuons_ = true; 
 }
 
 const unsigned EXOTag::getEventNumber() const { return eventNumber_; }
@@ -376,6 +416,18 @@ int EXOTag::countElectronsOverPT(float ptCut) const {
     return count;
 }
 
+int EXOTag::countMuonsOverPT (float ptCut) const { 
+    if (muons_->size() > 1000 || muons_->size () == 0) return 0; 
+    
+    unsigned int count = 0; 
+    for (unsigned int i = 0; i < muons_->size (); ++ i) { 
+        edm::Ptr<flashgg::Muon> muon = muons_->ptrAt(i);
+
+        if  (muon->pt () > 0) ++ count; 
+    }
+
+    return count; 
+}
        
         
 int EXOTag::getJetMultiplicities_All() const {return hasJets_ ? countJetsOverPT(0.0) : 0;}
@@ -405,6 +457,16 @@ float EXOTag::getDielectronDeltaEta() const { return hasDielectron_ ? fabs(diele
 float EXOTag::getDielectronZeppenfeld() const { return hasDielectron_ ? fabs(diphoton_->eta() - 0.5*(dielectron_.first->eta()-dielectron_.second->eta())) : -999.; }
 float EXOTag::getDielectronDeltaPhi_ee() const { return hasDielectron_ ? fabs(deltaPhi(dielectron_.first->phi() , dielectron_.second->phi())) : -999.; } 
 float EXOTag::getDielectronDeltaPhi_ggee() const { return hasDielectron_ ? fabs(deltaPhi(diphoton_->phi() , (dielectron_.first->p4()+dielectron_.second->p4()).Phi())) : -999; }
+
+float EXOTag::getDimuonLeadPt() const { return hasDimuon_ ? dimuon_.first->pt() : -999.; }
+float EXOTag::getDimuonSubleadPt() const { return hasDimuon_ ? dimuon_.second->pt() : -999.; }
+float EXOTag::getDimuonLeadEta() const { return hasDimuon_ ? dimuon_.first->eta() : -999.; }
+float EXOTag::getDimuonSubleadEta() const { return hasDimuon_ ? dimuon_.second->eta() : -999.; }
+float EXOTag::getDimuonMass() const { return hasDimuon_ ? (dimuon_.first->p4()+dimuon_.second->p4()).M() : -999.; }
+float EXOTag::getDimuonDeltaEta() const { return hasDimuon_ ? fabs(dimuon_.first->eta()-dimuon_.second->eta()) : -999.; }
+float EXOTag::getDimuonZeppenfeld() const { return hasDimuon_ ? fabs(diphoton_->eta() - 0.5*(dimuon_.first->eta()-dimuon_.second->eta())) : -999.; }
+float EXOTag::getDimuonDeltaPhi_ee() const { return hasDimuon_ ? fabs(deltaPhi(dimuon_.first->phi() , dimuon_.second->phi())) : -999.; } 
+float EXOTag::getDimuonDeltaPhi_ggee() const { return hasDimuon_ ? fabs(deltaPhi(diphoton_->phi() , (dimuon_.first->p4()+dimuon_.second->p4()).Phi())) : -999; }
 
 
 // Local Variables:

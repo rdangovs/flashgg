@@ -80,6 +80,8 @@ process.TFileService = cms.Service( "TFileService",
                                     closeFileFast = cms.untracked.bool(True) )
 
 
+print col("Hello", "red")
+
 import flashgg.Taggers.dumperConfigTools as cfgTools
 from  flashgg.Taggers.tagsDumpers_cfi import createTagDumper
 
@@ -92,17 +94,19 @@ from flashgg.Taggers.flashggTags_cff import UnpackedJetCollectionVInputTag
 process.flashggEXOTag = cms.EDProducer("FlashggEXOTagProducer",
                                 inputTagJets= UnpackedJetCollectionVInputTag,
                                	ElectronTag= cms.InputTag(electronString),
-								#ElectronTag= cms.InputTag("flashggElectrons"),
+				MuonTag = cms.InputTag("flashggSelectedMuons"),
 				DiPhotonTag     = cms.InputTag("flashggDiPhotons"),
                                 rhoFixedGridCollection = cms.InputTag('fixedGridRhoAll')
                                 )
 
-
+print col("hello", "red")
 
 process.exoTagDumper = createTagDumper("EXOTag")
 process.exoTagDumper.dumpTrees = True
 process.exoTagDumper.dumpHistos = False
 process.exoTagDumper.dumpWorkspace = False
+
+print col("heyya", "red") 
 
 diphoton_vars = [
 
@@ -183,7 +187,21 @@ electron_vars = [
 
         ]
         
-all_var = diphoton_vars + jet_vars + electron_vars
+muon_vars = [
+        "dimuon_LeadPt := getDimuonLeadPt()",
+        "dimuon_SubleadPt := getDimuonSubleadPt()",
+        "dimuon_LeadEta := getDimuonLeadEta()",
+        "dimuon_SubleadEta := getDimuonSubleadEta()",
+        "dimuon_Mass := getDimuonMass()",
+        "dimuon_DeltaEta := getDimuonDeltaEta()",
+        "dimuon_Zeppenfeld := getDimuonZeppenfeld()",
+        "dimuon_DeltaPhi_ee := getDimuonDeltaPhi_ee()",
+        "dimuon_DeltaPhi_ggee := getDimuonDeltaPhi_ggee()"
+        ]
+
+all_var = diphoton_vars + jet_vars + electron_vars + muon_vars
+
+print "yo!"
 
 cfgTools.addCategories(process.exoTagDumper,
                         [("test","getDiphotonMass()>0",0)],
@@ -191,12 +209,19 @@ cfgTools.addCategories(process.exoTagDumper,
                         histograms = []
                         )
 
+print "yo2!"
+
 process.exoTagDumper.nameTemplate = "$PROCESS_$SQRTS_$CLASSNAME_$SUBCAT_$LABEL"
+
+print "yo3!" 
+
 
 from flashgg.MetaData.JobConfig import customize
 customize.setDefault("maxEvents",-1)
 customize.setDefault("targetLumi",1.e+4)
 customize(process)
+
+print "yo4!"
 
 process.p1 = cms.Path( process.flashggUnpackedJets+process.flashggEXOTag+process.exoTagDumper )
 
