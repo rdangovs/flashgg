@@ -113,9 +113,15 @@ namespace flashgg {
         unsigned eventNumber_;
 
         edm::Ptr<DiPhotonCandidate> diphoton_;
+        /*
         edm::Handle<edm::View<flashgg::Jet>> jets_;
         edm::Handle<edm::View<flashgg::Electron>> electrons_;
         edm::Handle<edm::View<flashgg::Muon>> muons_;
+        */
+
+        std::vector<edm::Ptr<flashgg::Jet>> jetsVector_; 
+        std::vector<edm::Ptr<flashgg::Electron>> electronsVector_;
+        std::vector<edm::Ptr<flashgg::Muon>> muonsVector_;
 
         typedef std::pair<edm::Ptr<flashgg::Jet>,edm::Ptr<flashgg::Jet>> Dijet;
         typedef std::pair<edm::Ptr<flashgg::Electron>,edm::Ptr<flashgg::Electron>> Dielectron;
